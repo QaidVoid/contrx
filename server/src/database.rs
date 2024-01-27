@@ -6,16 +6,10 @@ pub struct Database {
 
 impl Database {
     pub async fn new(url: &str) -> Self {
-        let pool = PgPoolOptions::new()
-            .max_connections(30)
-            .connect(url)
-            .await;
+        let pool = PgPoolOptions::new().max_connections(30).connect(url).await;
 
         match pool {
-            Ok(pool) => {
-                println!("Database connection established.");
-                Self { pool }
-            },
+            Ok(pool) => Self { pool },
             Err(e) => {
                 eprintln!("{e}");
                 panic!("Failed to connect to the database.");
