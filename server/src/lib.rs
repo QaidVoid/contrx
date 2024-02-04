@@ -1,11 +1,14 @@
 use config::Config;
 use sqlx::{Pool, Postgres};
 use tokio::signal;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::routes::create_router;
 
 pub mod config;
 pub mod database;
+pub mod domain;
+pub mod error;
 pub mod routes;
 
 #[derive(Clone)]
@@ -26,6 +29,15 @@ pub async fn run(config: &Config, pool: &Pool<Postgres>) {
     };
 
     println!("Starting server on: {addr}");
+
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "contrx_server=debug,tower_http=debug,axum=trace".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await

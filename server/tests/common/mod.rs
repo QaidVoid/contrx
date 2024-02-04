@@ -26,6 +26,8 @@ impl TestApp {
         let db = Database::new(&config.database_url()).await;
         let pool = db.get_pool().await;
 
+        sqlx::migrate!().run(pool).await.unwrap();
+
         let state = AppState {
             pool: pool.to_owned(),
         };
