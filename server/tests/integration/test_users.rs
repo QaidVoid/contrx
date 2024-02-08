@@ -3,8 +3,6 @@ use contrx_server::domain::user::CreateUserPayload;
 
 use crate::common::{create_user, mock, TestApp};
 
-mod common;
-
 #[tokio::test]
 async fn create_user_should_return_error() {
     let t = TestApp::new().await;

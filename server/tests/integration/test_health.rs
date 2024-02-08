@@ -6,8 +6,6 @@ use tower::ServiceExt;
 
 use crate::common::TestApp;
 
-mod common;
-
 #[tokio::test]
 async fn health_should_be_ok() {
     let t = TestApp::new().await;

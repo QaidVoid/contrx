@@ -7,8 +7,6 @@ use tower::ServiceExt;
 
 use crate::common::{create_user, mock, TestApp};
 
-mod common;
-
 pub async fn login(t: &TestApp, payload: &LoginPayload) -> Response<Body> {
     t.app
         .to_owned()
