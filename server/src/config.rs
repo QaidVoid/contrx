@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, sync::LazyLock};
 
 use serde::Deserialize;
 
@@ -18,9 +18,16 @@ pub struct Database {
 }
 
 #[derive(Deserialize)]
+pub struct Secret {
+    pub refresh: String,
+    pub access: String,
+}
+
+#[derive(Deserialize)]
 pub struct Config {
     pub app: App,
     pub database: Database,
+    pub secret: Secret,
 }
 
 impl Config {
@@ -53,3 +60,5 @@ impl Default for Config {
         Self::new()
     }
 }
+
+pub static CONFIG: LazyLock<Config> = LazyLock::new(Config::default);

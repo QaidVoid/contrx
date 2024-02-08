@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use axum::{
-    http::{Response, StatusCode},
+    http::{header::WWW_AUTHENTICATE, HeaderMap, HeaderValue, Response, StatusCode},
     response::IntoResponse,
     Json,
 };
@@ -12,6 +12,7 @@ use crate::domain::user::EmailError;
 pub enum Error {
     UnprocessableEntity { errors: Vec<ErrorDetail> },
     InternalServerError,
+    Unauthorized,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -57,6 +58,14 @@ impl IntoResponse for Error {
                 }
                 (StatusCode::UNPROCESSABLE_ENTITY, Json(Errors { errors })).into_response()
             }
+            Self::Unauthorized => (
+                StatusCode::UNAUTHORIZED,
+                [(WWW_AUTHENTICATE, HeaderValue::from_static("Token"))]
+                    .into_iter()
+                    .collect::<HeaderMap>(),
+                "Authentication is required",
+            )
+                .into_response(),
             _ => (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response(),
         }
     }

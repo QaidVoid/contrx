@@ -1,7 +1,17 @@
-use axum::Router;
-use contrx_server::{config::Config, database::Database, routes::create_router, AppState};
+use axum::{
+    body::Body,
+    http::{Request, Response},
+    Router,
+};
+use contrx_server::{
+    config::Config, database::Database, domain::user::CreateUserPayload, routes::create_router,
+    AppState,
+};
+
+pub mod mock;
 
 use sqlx::PgPool;
+use tower::ServiceExt;
 use uuid::Uuid;
 
 pub struct TestApp {
@@ -52,4 +62,19 @@ impl TestApp {
             .await
             .unwrap();
     }
+}
+
+pub async fn create_user(t: &TestApp, payload: &CreateUserPayload) -> Response<Body> {
+    t.app
+        .to_owned()
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .header("Content-Type", "application/json")
+                .uri("/api/users")
+                .body(Body::from(serde_json::to_string(&payload).unwrap()))
+                .unwrap(),
+        )
+        .await
+        .unwrap()
 }

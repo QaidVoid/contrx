@@ -1,3 +1,5 @@
+#![feature(lazy_cell)]
+
 use config::Config;
 use sqlx::{Pool, Postgres};
 use tokio::signal;

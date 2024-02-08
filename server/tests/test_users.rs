@@ -1,28 +1,9 @@
-use axum::{
-    body::Body,
-    http::{Request, Response, StatusCode},
-};
+use axum::http::StatusCode;
 use contrx_server::domain::user::CreateUserPayload;
-use tower::ServiceExt;
 
-use crate::common::TestApp;
+use crate::common::{create_user, mock, TestApp};
 
 mod common;
-
-async fn create_user(t: &TestApp, payload: &CreateUserPayload) -> Response<Body> {
-    t.app
-        .to_owned()
-        .oneshot(
-            Request::builder()
-                .method("POST")
-                .header("Content-Type", "application/json")
-                .uri("/api/users")
-                .body(Body::from(serde_json::to_string(&payload).unwrap()))
-                .unwrap(),
-        )
-        .await
-        .unwrap()
-}
 
 #[tokio::test]
 async fn create_user_should_return_error() {
@@ -31,16 +12,20 @@ async fn create_user_should_return_error() {
     let mut payload = CreateUserPayload {
         email: "".into(),
         password: "".into(),
+        confirm_password: "".into(),
         first_name: "".into(),
         last_name: "".into(),
     };
 
     let res1 = create_user(&t, &payload).await;
 
-    payload.email = "test".into();
-    payload.password = "test123".into();
-    payload.first_name = "test".into();
-    payload.last_name = "test".into();
+    payload = CreateUserPayload {
+        email: "test".into(),
+        password: "test123".into(),
+        confirm_password: "test12".into(),
+        first_name: "test".into(),
+        last_name: "test".into(),
+    };
     let res2 = create_user(&t, &payload).await;
 
     t.drop_async().await;
@@ -53,12 +38,7 @@ async fn create_user_should_return_error() {
 async fn create_user_should_return_ok() {
     let t = TestApp::new().await;
 
-    let payload = CreateUserPayload {
-        email: "test@mail.com".into(),
-        password: "test123".into(),
-        first_name: "Test".into(),
-        last_name: "User".into(),
-    };
+    let payload = mock::new_user();
 
     let res = create_user(&t, &payload).await;
 
@@ -71,12 +51,7 @@ async fn create_user_should_return_ok() {
 async fn create_user_should_return_ok_then_error() {
     let t = TestApp::new().await;
 
-    let payload = CreateUserPayload {
-        email: "test@mail.com".into(),
-        password: "test123".into(),
-        first_name: "Test".into(),
-        last_name: "User".into(),
-    };
+    let payload = mock::new_user();
 
     let res_first = create_user(&t, &payload).await;
     let res_second = create_user(&t, &payload).await;

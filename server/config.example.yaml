@@ -7,3 +7,6 @@ database:
   password: postgres
   host: 127.0.0.1
   port: 5432
+secret:
+  refresh: "refresh_secret"
+  access: "access_secret"
