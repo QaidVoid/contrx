@@ -11,10 +11,10 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type { LoginUser } from "../types/user";
 import api from "../services/api";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
+import type { LoginPayload } from "../types/auth";
 
 function Login() {
   const form = useForm({
@@ -29,14 +29,13 @@ function Login() {
   });
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const handleSubmit = async (data: LoginUser) => {
+  const handleSubmit = async (data: LoginPayload) => {
     setIsLoggingIn(true);
     const { body, status } = await api.login({
       body: data,
     });
 
     if (status === 200) {
-      console.log(body);
       notifications.show({
         title: "Login",
         message: "Logged in successfully.",
