@@ -20,17 +20,37 @@ pub struct AuthToken {
 
 pub enum AuthError {
     InvalidCredentials,
+    InvalidSession,
+    InvalidHeader,
+    MissingToken,
+    InvalidTokenFormat
 }
 
 #[derive(Serialize, Deserialize)]
-struct Claims {
-    sid: Uuid,
-    exp: u64,
+pub struct Claims {
+    pub sid: Uuid,
+    pub exp: u64,
 }
 
 impl From<AuthError> for Error {
-    fn from(_: AuthError) -> Self {
-        Error::unprocessable_entity([("invalid_credentials", "Invalid login credentials")])
+    fn from(value: AuthError) -> Self {
+        match value {
+            AuthError::InvalidCredentials => {
+                Error::unprocessable_entity([("invalid_credentials", "Invalid login credentials")])
+            }
+            AuthError::InvalidSession => {
+                Error::unprocessable_entity([("invalid_session", "Invalid session")])
+            }
+            AuthError::InvalidHeader => {
+                Error::unprocessable_entity([("invalid_header", "Invalid header")])
+            }
+            AuthError::MissingToken => {
+                Error::unprocessable_entity([("missing_token", "Missing authentication token")])
+            }
+            AuthError::InvalidTokenFormat => {
+                Error::unprocessable_entity([("invalid_token_format", "Invalid token format")])
+            }
+        }
     }
 }
 

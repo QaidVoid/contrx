@@ -11,6 +11,7 @@ pub mod config;
 pub mod database;
 pub mod domain;
 pub mod error;
+pub mod middleware;
 pub mod routes;
 
 #[derive(Clone)]

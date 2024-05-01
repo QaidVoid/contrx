@@ -28,7 +28,7 @@ pub fn create_router(state: AppState) -> Router {
 
     Router::new()
         .route("/health", get(health))
-        .nest("/api/auth", auth_router())
+        .nest("/api/auth", auth_router(&state))
         .nest("/api/users", users_router())
         .fallback(not_found)
         .with_state(state)
