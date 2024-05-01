@@ -17,7 +17,7 @@ sqlx = { version = "0.7.3", features = ["uuid", "postgres", "time", "runtime-tok
 tokio = { version = "1.35.1", features = ["rt-multi-thread", "macros", "signal"] }
 tower = "0.4.13"
 tower-cookies = "0.10.0"
-tower-http = { version = "0.5.1", features = ["timeout", "trace"] }
+tower-http = { version = "0.5.1", features = ["cors", "timeout", "trace"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 uuid = { version = "1.7.0", features = ["v4", "serde"] }
 
