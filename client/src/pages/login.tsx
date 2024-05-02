@@ -6,28 +6,26 @@ import {
   Button,
   Title,
   Text,
-  Anchor,
   Group,
   LoadingOverlay,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { useForm, zodResolver } from "@mantine/form";
 import api from "../services/api";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
-import type { LoginPayload } from "../types/auth";
+import { LoginPayload } from "../types/auth";
+import { Link } from "react-router-dom";
+import useAuth from "../hooks/use-auth";
 
 function Login() {
-  const form = useForm({
+  const form = useForm<LoginPayload>({
     mode: "uncontrolled",
-    initialValues: {
-      email: "",
-      password: "",
-    },
-    validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
-    },
+    validate: zodResolver(LoginPayload),
   });
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const auth = useAuth();
+
+  console.log("ERR:", form.errors);
 
   const handleSubmit = async (data: LoginPayload) => {
     setIsLoggingIn(true);
@@ -36,7 +34,11 @@ function Login() {
     });
 
     if (status === 200) {
+      auth.login(body);
+
       notifications.show({
+        bg: "green.0",
+        color: "green",
         title: "Login",
         message: "Logged in successfully.",
       });
@@ -66,7 +68,7 @@ function Login() {
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
             label="Email address"
-            placeholder="hello@gmail.com"
+            placeholder="Your email address"
             size="md"
             key={form.key("email")}
             {...form.getInputProps("email")}
@@ -91,9 +93,12 @@ function Login() {
 
           <Text ta="center" mt="md">
             Don&apos;t have an account?{" "}
-            <Anchor<"a"> href="#" fw={700} onClick={(event) => event.preventDefault()}>
+            <Link
+              to="/register"
+              className="no-underline hover:underline text-blue-800 font-semibold"
+            >
               Register
-            </Anchor>
+            </Link>
           </Text>
         </form>
       </Paper>

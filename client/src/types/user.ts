@@ -27,3 +27,20 @@ export const NewUserResponse = z.object({
 });
 
 export type NewUserResponse = z.infer<typeof NewUserResponse>;
+
+export const NewUserErrorResponse = z.object({
+  errors: z.array(
+    z.object({
+      code: z.enum([
+        "email_already_used",
+        "empty_password",
+        "empty_confirm_password",
+        "confirm_password",
+        "password_mismatch",
+      ]),
+      message: z.string(),
+    }),
+  ),
+});
+
+export type NewUserErrorResponse = z.infer<typeof NewUserErrorResponse>;

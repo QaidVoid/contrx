@@ -7,8 +7,12 @@ export const AuthUser = z.object({
 export type AuthUser = z.infer<typeof AuthUser>;
 
 export const LoginPayload = z.object({
-  email: z.string(),
-  password: z.string(),
+  email: z.string({
+    required_error: "Email is required"
+  }).email({
+    message: "Invalid email"
+  }),
+  password: z.string().trim(),
 });
 
 export type LoginPayload = z.infer<typeof LoginPayload>;

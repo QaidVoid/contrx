@@ -1,54 +1,52 @@
-import { type ReactNode, createContext, useState } from 'react'
-import type { AuthUser, LoginResponse } from '../types/auth'
-import { setCookie } from '../lib'
+import { type ReactNode, createContext, useState, useCallback, useMemo } from "react";
+import type { LoginResponse } from "../types/auth";
+import { initClient } from "@ts-rest/core";
+import { contract } from "../services/contract";
+import { API_URL } from "../lib/constants";
+import type api from "../services/api";
 
 interface AuthContextProps {
-  auth: LoginResponse
-  setAuth: React.Dispatch<React.SetStateAction<LoginResponse>>
-  user: AuthUser
-  setUser: React.Dispatch<React.SetStateAction<AuthUser>>
-  logout: () => void
-  isLoading: boolean
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  auth: LoginResponse;
+  api: typeof api;
+  login: (auth: LoginResponse) => void;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const initialAuth: LoginResponse = {
-  access_token: '',
-  refresh_token: '',
-}
+  access_token: "",
+  refresh_token: "",
+};
 
-const initialUser: AuthUser = {
-  id: 0
-}
-
-const AuthContext = createContext<AuthContextProps>({} as AuthContextProps)
+const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [auth, setAuth] = useState(initialAuth)
-  const [user, setUser] = useState(initialUser)
-  const [isLoading, setIsLoading] = useState(false)
+  const [auth, setAuth] = useState(initialAuth);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const logout = () => {
-    setAuth(initialAuth)
-    setUser(initialUser)
-    setCookie('refresh_token', '', 0)
-  }
+  const api = useMemo(() => {
+    return initClient(contract, {
+      baseUrl: API_URL,
+      baseHeaders: {
+        Authorization: `Bearer ${auth.access_token}`,
+      },
+      credentials: "include",
+    });
+  }, [auth.access_token]);
+
+  const login = useCallback((auth: LoginResponse) => {
+    setAuth(auth);
+  }, []);
 
   const contextData = {
     auth,
-    setAuth,
-    user,
-    setUser,
-    logout,
+    api,
+    login,
     isLoading,
     setIsLoading,
   };
 
-  return (
-      <AuthContext.Provider value={contextData}>
-        {children}
-      </AuthContext.Provider>
-  );
-}
+  return <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>;
+};
 
-export default AuthContext
+export default AuthContext;

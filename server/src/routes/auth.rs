@@ -1,5 +1,5 @@
 use argon2::{Argon2, PasswordHash};
-use axum::{extract::State, middleware, routing::post, Extension, Json, Router};
+use axum::{extract::State, middleware, routing::{get, post}, Extension, Json, Router};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use tower_cookies::{
@@ -25,7 +25,7 @@ pub fn auth_router(state: &AppState) -> Router<AppState> {
         .route("/logout", post(logout))
         .route_layer(middleware::from_fn_with_state(state.clone(), auth_middleware))
         .route("/login", post(login))
-        .route("/refresh_token", post(refresh_token))
+        .route("/refresh_token", get(refresh_token))
 }
 
 #[axum::debug_handler]
@@ -71,7 +71,13 @@ async fn login(
     .await
     .map_err(Error::from)?;
 
-    cookies.add(Cookie::new("refresh_token", refresh_token.to_owned()));
+    let mut cookie = Cookie::new("refresh_token", refresh_token.to_owned());
+    cookie.set_http_only(true);
+    cookie.set_same_site(SameSite::Lax);
+    cookie.set_secure(true);
+    cookie.set_max_age(Duration::weeks(12));
+
+    cookies.add(cookie);
 
     Ok(Json(AuthToken {
         refresh_token,
@@ -122,18 +128,22 @@ async fn refresh_token(State(state): State<AppState>, cookies: Cookies) -> Resul
             _ => Error::InternalServerError,
         })?;
 
-    let session_id = Uuid::new_v4();
+    let session_id = token.claims.sid;
+    // let session_id = Uuid::new_v4();
     let refresh_token = create_refresh_token(session_id).map_err(|_| Error::InternalServerError)?;
     let access_token = create_access_token(session_id).map_err(|_| Error::InternalServerError)?;
 
-    sqlx::query!(
-        "UPDATE sessions SET id = $2 WHERE id = $1",
-        row.id,
-        session_id
-    )
-    .execute(&state.pool)
-    .await
-    .map_err(|_| AuthError::InvalidCredentials)?;
+    // TODO: updating session id directly results in it not being properly set on client side cookie.
+    // need to find a better approach
+    //
+    // sqlx::query!(
+    //     "UPDATE sessions SET id = $2 WHERE id = $1",
+    //     row.id,
+    //     session_id
+    // )
+    // .execute(&state.pool)
+    // .await
+    // .map_err(|_| AuthError::InvalidCredentials)?;
 
     let mut cookie = Cookie::new("refresh_token", refresh_token.clone());
     cookie.set_http_only(true);

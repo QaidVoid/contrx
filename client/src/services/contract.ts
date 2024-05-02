@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
-import { NewUserPayload, NewUserResponse } from "../types/user";
+import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
 
 const c = initContract();
 
@@ -19,17 +19,26 @@ export const contract = c.router({
     path: "/api/users",
     responses: {
       200: NewUserResponse,
+      422: NewUserErrorResponse
     },
     body: NewUserPayload,
     summary: "Signup new user"
   },
   refreshToken: {
-    method: "POST",
-    path: "api/auth/refresh_token",
+    method: "GET",
+    path: "/api/auth/refresh_token",
     responses: {
       200: LoginResponse,
     },
-    body: null,
     summary: "Refresh token"
+  },
+  logout: {
+    method: "POST",
+    path: "/api/auth/logout",
+    responses: {
+      200: null
+    },
+    body: null,
+    summary: "Logout"
   }
 });

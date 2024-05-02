@@ -5,7 +5,6 @@ import {
   Button,
   Title,
   Text,
-  Anchor,
   Group,
   LoadingOverlay,
 } from "@mantine/core";
@@ -15,6 +14,7 @@ import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { NewUserPayload } from "../types/user";
 import { match } from "ts-pattern";
+import { Link } from "react-router-dom";
 
 function Register() {
   const form = useForm({
@@ -26,7 +26,10 @@ function Register() {
       password: "",
       confirm_password: "",
     },
-    validate: zodResolver(NewUserPayload),
+    validate: zodResolver(NewUserPayload.refine((data) => data.password === data.confirm_password, {
+      message: "Passwords do not match",
+      path: ["confirm_password"]
+    }))
   });
   const [isSigningUp, setIsSigningUp] = useState(false);
 
@@ -55,12 +58,6 @@ function Register() {
             form.setFieldError("confirm_password", error.message),
           );
       }
-
-      notifications.show({
-        color: "red.7",
-        title: "Signup",
-        message: "Invalid fields",
-      });
     } else {
       notifications.show({
         color: "red.7",
@@ -75,7 +72,7 @@ function Register() {
     <Group h="100vh" justify="center" align="center">
       <Paper radius={16} p={30} withBorder shadow="md" w="90%" maw="600px">
         <Title c="blue.8" order={2} ta="center" mt="md" mb={50}>
-          Welcome back!
+          Create New Account
         </Title>
 
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -91,6 +88,7 @@ function Register() {
             required
             label="First Name"
             placeholder="John"
+            mt="md"
             size="md"
             key={form.key("first_name")}
             {...form.getInputProps("first_name")}
@@ -99,6 +97,7 @@ function Register() {
             required
             label="Last Name"
             placeholder="Doe"
+            mt="md"
             size="md"
             key={form.key("last_name")}
             {...form.getInputProps("last_name")}
@@ -132,9 +131,9 @@ function Register() {
 
           <Text ta="center" mt="md">
             Already have an account?{" "}
-            <Anchor<"a"> href="#" fw={700} onClick={(event) => event.preventDefault()}>
+            <Link to="/login" className="no-underline hover:underline text-blue-800 font-semibold">
               Login
-            </Anchor>
+            </Link>
           </Text>
         </form>
       </Paper>

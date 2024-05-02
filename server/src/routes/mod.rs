@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use axum::http::{header, Method};
 use axum::{http::StatusCode, routing::get, Router};
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::{Any, CorsLayer};
@@ -21,10 +22,21 @@ async fn health() -> StatusCode {
 }
 
 pub fn create_router(state: AppState) -> Router {
+    let origin = ["http://localhost:5173".parse().unwrap()];
+    let methods = [
+        Method::GET,
+        Method::POST,
+        Method::PUT,
+        Method::PATCH,
+        Method::DELETE,
+    ];
+    let headers = [header::AUTHORIZATION, header::COOKIE, header::CONTENT_TYPE];
+
     let cors = CorsLayer::new()
-        .allow_headers(Any)
-        .allow_methods(Any)
-        .allow_origin(Any);
+        .allow_headers(headers)
+        .allow_methods(methods)
+        .allow_origin(origin)
+        .allow_credentials(true);
 
     Router::new()
         .route("/health", get(health))
