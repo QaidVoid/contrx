@@ -36,7 +36,7 @@ async fn login(
 ) -> Result<AuthToken> {
     #[derive(Serialize, Deserialize)]
     struct AuthUser {
-        id: i64,
+        id: Uuid,
         password_hash: String,
     }
 

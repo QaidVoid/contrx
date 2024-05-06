@@ -8,9 +8,13 @@ use tower_http::{timeout::TimeoutLayer, trace::TraceLayer};
 
 use crate::AppState;
 
+use self::contracts::contracts_router;
+use self::organizations::organizations_router;
 use self::{auth::auth_router, users::users_router};
 
 mod auth;
+mod contracts;
+mod organizations;
 mod users;
 
 async fn not_found() -> StatusCode {
@@ -42,6 +46,8 @@ pub fn create_router(state: AppState) -> Router {
         .route("/health", get(health))
         .nest("/api/auth", auth_router(&state))
         .nest("/api/users", users_router())
+        .nest("/api/organizations", organizations_router(&state))
+        .nest("/api/contracts", contracts_router())
         .fallback(not_found)
         .with_state(state)
         .layer(cors)

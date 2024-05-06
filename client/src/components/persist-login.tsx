@@ -22,11 +22,12 @@ function PersistLogin() {
   }, [login, auth.access_token]);
 
   useEffect(() => {
-    if (auth.access_token && (from === "/login" || from === "/")) {
+    if (auth.access_token && from === "/login") {
       navigate("/app");
-    } else if (auth.access_token) {
-      navigate(from, { replace: true });
     }
+    // else if (auth.access_token) {
+    //   navigate(from, { replace: true });
+    // }
   }, [auth.access_token, from, navigate]);
 
   return isLoading ? null : <Outlet />;

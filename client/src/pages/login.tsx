@@ -25,8 +25,6 @@ function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const auth = useAuth();
 
-  console.log("ERR:", form.errors);
-
   const handleSubmit = async (data: LoginPayload) => {
     setIsLoggingIn(true);
     const { body, status } = await api.login({

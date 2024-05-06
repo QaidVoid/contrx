@@ -8,6 +8,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use crate::routes::create_router;
 
 pub mod config;
+pub mod constants;
 pub mod database;
 pub mod domain;
 pub mod error;
