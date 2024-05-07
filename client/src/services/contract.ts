@@ -3,6 +3,7 @@ import { LoginPayload, LoginResponse } from "../types/auth";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
 import { NewContractPayload, NewContractResponse } from "../types/contract";
 import { OrganizationPayload, NewOrganizationResponse } from "../types/organization";
+import { ClausesResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
 
 const c = initContract();
 
@@ -66,6 +67,23 @@ export const contract = c.router({
     path: "/api/organizations/:organizationId",
     responses: {
       200: NewOrganizationResponse,
+    },
+    summary: "Get organization info"
+  },
+  createClause: {
+    method: "POST",
+    path: "/api/clauses",
+    responses: {
+      200: NewClauseResponse
+    },
+    body: NewClausePayload,
+    summary: "Create new clause"
+  },
+  getClauses: {
+    method: "GET",
+    path: "/api/clauses/:organizationId",
+    responses: {
+      200: ClausesResponse,
     },
     summary: "Get organization info"
   },

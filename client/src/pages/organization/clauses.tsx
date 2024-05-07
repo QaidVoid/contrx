@@ -1,35 +1,56 @@
-import { useState } from 'react';
-import { Table, Checkbox, Menu, MenuItem, Popover, Button } from '@mantine/core';
-import TitleBar from '../../components/title-bar';
+import { useCallback, useEffect, useState } from 'react';
+import { Table, Checkbox, Menu, MenuItem, Popover, Button, Group, Text } from '@mantine/core';
 import { Link, useParams } from 'react-router-dom';
 import { IconDots } from '@tabler/icons-react';
-
-const clauses = [
-  { id: 1, name: "No obligation", clauseType: "No obligation", lastModifiedBy: "Someone", lastModifiedOn: "2024-05-05" },
-  { id: 2, name: "Participation", clauseType: "Rights", lastModifiedBy: "Someone", lastModifiedOn: "2024-05-05" }
-];
+import CreateClauseForm from '../../components/create-clause-form';
+import useAuth from '../../hooks/use-auth';
+import { notifications } from '@mantine/notifications';
+import { ClausesResponse } from '../../types/clause';
 
 function OrganizationClauses() {
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const { api } = useAuth();
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const params = useParams();
+  const [clauses, setClauses] = useState<ClausesResponse>([]);
 
   if (!params.organizationId) return;
 
   const organizationId = params.organizationId;
 
-  const handleActionClick = (clauseId: number) => {
+  const fetchClauses = useCallback(async () => {
+    const { body, status } = await api.getClauses({
+      params: {
+        organizationId
+      }
+    });
+
+    if (status === 200) {
+      setClauses(body);
+    } else {
+      notifications.show({
+        color: "red",
+        message: "Invalid organization"
+      })
+    }
+  }, [organizationId, api.getOrganization]);
+
+  useEffect(() => {
+    fetchClauses();
+  }, []);
+
+  const handleActionClick = (clauseId: string) => {
     // Implement your action logic here
     console.log(`Action clicked for clause ID ${clauseId}`);
   };
 
-  const actionMenu = (clauseId: number) => (
+  const actionMenu = (clauseId: string) => (
     <Menu>
       <MenuItem onClick={() => handleActionClick(clauseId)}>Download</MenuItem>
       <MenuItem onClick={() => handleActionClick(clauseId)}>Delete</MenuItem>
     </Menu>
   );
 
-  const rows = clauses.map((clause) => (
+  const rows = clauses?.map((clause) => (
     <Table.Tr
       key={clause.name}
       bg={selectedRows.includes(clause.id) ? 'var(--mantine-color-blue-light)' : undefined}
@@ -48,9 +69,9 @@ function OrganizationClauses() {
         />
       </Table.Td>
       <Table.Td><Link to={`/${organizationId}/${clause.name}`} className="color-blue-800">{clause.name}</Link></Table.Td>
-      <Table.Td>{clause.clauseType}</Table.Td>
-      <Table.Td>{clause.lastModifiedBy}</Table.Td>
-      <Table.Td>{clause.lastModifiedOn}</Table.Td>
+      <Table.Td>{clause.type}</Table.Td>
+      <Table.Td>{clause.last_modified_by}</Table.Td>
+      <Table.Td>{clause.last_modified_at}</Table.Td>
       <Table.Td>
         <Popover
           position="bottom"
@@ -72,7 +93,10 @@ function OrganizationClauses() {
 
   return (
     <>
-      <TitleBar title="Clause Library" />
+      <Group bg="green.6" p={18} justify='space-between'>
+        <Text c="white">Clause Library</Text>
+        <CreateClauseForm organizationId={organizationId} />
+      </Group>
       <Table>
         <Table.Thead>
           <Table.Tr>

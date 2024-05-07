@@ -44,3 +44,10 @@ async fn create_user(
 
     Ok(Json(user))
 }
+
+// TODO: Invite users to organization
+//
+// #[axum::debug_handler]
+// async fn invite_org_user() -> Result<CreateOrgUser> {
+//
+// }
