@@ -22,7 +22,7 @@ export type NewClauseResponse = z.infer<typeof NewClauseResponse>;
 export const ClauseResponse = NewClauseResponse.extend({
   organization_id: z.string(),
   last_modified_by: z.string(),
-  last_modified_at: z.string()
+  last_modified_at: z.array(z.number())
 });
 
 export type ClauseResponse = z.infer<typeof ClauseResponse>;

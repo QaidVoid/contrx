@@ -1,22 +1,27 @@
-import { Stack, Text } from "@mantine/core";
+import { ActionIcon, Box, Group, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import CreateClauseForm from "../../components/create-clause-form";
 import Table from "../../components/table";
 import TitleBar from "../../components/title-bar";
 import useAuth from "../../hooks/use-auth";
-import type { PaginatedClausesResponse } from "../../types/clause";
+import type { ClauseResponse, PaginatedClausesResponse } from "../../types/clause";
+import EditClause from "../../components/edit-clause-form";
+import dayjs from "dayjs";
+import { parseDate } from "../../lib";
 
 function OrganizationClauses() {
   const { api } = useAuth();
   const params = useParams();
   const [clauses, setClauses] = useState<PaginatedClausesResponse>({
     data: [],
-    total_count: 0
+    total_count: 0,
   });
   const [fetching, { open: fetch, close: completeFetch }] = useDisclosure(false);
+  const [clause, setClause] = useState<ClauseResponse | undefined>();
   const [searchParams, _] = useSearchParams();
 
   if (!params.organizationId) return;
@@ -55,6 +60,13 @@ function OrganizationClauses() {
       <TitleBar>
         <Text c="white">Clause Library</Text>
         <CreateClauseForm organizationId={organizationId} onCreate={fetchClauses} />
+
+        <EditClause
+          onEdit={fetchClauses}
+          opened={Boolean(clause)}
+          clause={clause}
+          close={() => setClause(undefined)}
+        />
       </TitleBar>
 
       <Stack p="md">
@@ -82,7 +94,32 @@ function OrganizationClauses() {
             {
               accessor: "last_modified_at",
               title: "Last Modified At",
-              render: (record) => record.last_modified_at,
+              render: (record) => dayjs(parseDate(record.last_modified_at)).format("MMM DD, YYYY"),
+            },
+            {
+              accessor: "actions",
+              title: <Box mr={6}>Actions</Box>,
+              textAlign: "right",
+              render: (record) => (
+                <Group gap={4} justify="right" wrap="nowrap">
+                  <ActionIcon
+                    size="sm"
+                    variant="subtle"
+                    color="blue"
+                    onClick={() => setClause(record)}
+                  >
+                    <IconEdit size={16} />
+                  </ActionIcon>
+                  <ActionIcon
+                    size="sm"
+                    variant="subtle"
+                    color="red"
+                    onClick={() => {}}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                </Group>
+              ),
             },
           ]}
         />

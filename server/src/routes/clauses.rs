@@ -1,7 +1,7 @@
 use axum::{
     extract::{Path, Query, State},
     middleware,
-    routing::{get, post},
+    routing::{delete, get, post, put},
     Extension, Json, Router,
 };
 use time::OffsetDateTime;
@@ -9,7 +9,10 @@ use uuid::Uuid;
 
 use crate::{
     domain::{
-        clause::{Clause, CreateClause, CreateClausePayload, OrganizationClause},
+        clause::{
+            Clause, CreateClause, CreateClausePayload, EditClause, EditClausePayload,
+            OrganizationClause,
+        },
         pagination::{PageCount, PaginatedResponse, Pagination},
     },
     error::Error,
@@ -22,7 +25,9 @@ type Result<T> = std::result::Result<Json<T>, Error>;
 pub fn clauses_router(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/", post(create_clause))
-        .route("/:organization_id", get(get_clauses))
+        .route("/org/:organization_id", get(get_clauses))
+        .route("/:clause_id", delete(remove_clause))
+        .route("/", put(update_clause))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -58,6 +63,7 @@ async fn create_clause(
     )
     .fetch_one(&mut *tx)
     .await?;
+    println!("CLAUSE: {:?}", clause);
 
     sqlx::query!(
         r#"
@@ -122,4 +128,50 @@ async fn get_clauses(
         data: clauses,
         total_count: pages.total_count,
     }))
+}
+
+#[axum::debug_handler]
+async fn update_clause(
+    session_id: Extension<Uuid>,
+    State(state): State<AppState>,
+    Json(payload): Json<EditClausePayload>,
+) -> Result<Clause> {
+    let sid = session_id.0;
+
+    let edit_clause = EditClause::try_from(payload)?;
+
+    let clause = sqlx::query_as!(
+        Clause,
+        r#"
+    UPDATE clauses SET
+        title=$1,
+        name=$2,
+        type=$3,
+        language=$4,
+        last_modified_by=(SELECT user_id FROM sessions WHERE id=$5),
+        last_modified_at=$6
+    WHERE id=$7
+    RETURNING *
+    "#,
+        edit_clause.title,
+        edit_clause.name,
+        edit_clause.r#type,
+        edit_clause.language,
+        sid,
+        OffsetDateTime::now_utc(),
+        edit_clause.id
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    Ok(Json(clause))
+}
+
+#[axum::debug_handler]
+async fn remove_clause(Path(clause_id): Path<Uuid>, State(state): State<AppState>) -> Result<()> {
+    sqlx::query!("DELETE FROM clauses WHERE id=$1", clause_id)
+        .execute(&state.pool)
+        .await?;
+
+    Ok(Json(()))
 }

@@ -8,13 +8,13 @@ export type WithRequiredProperty<Type, Key extends keyof Type> = Type & {
   [Property in Key]-?: Type[Property];
 };
 
-type Props<T> = WithRequiredProperty<DataTableProps<T>, "records"> & {
+type Props<T> = WithRequiredProperty<DataTableProps<T>, "records" | "columns"> & {
   fetching: boolean;
   totalCount: number;
   fetcher: () => void;
 };
 
-function Table<T>({ fetcher, fetching, totalCount, records, ...props }: Props<T>) {
+function Table<T>({ fetcher, fetching, totalCount, records, columns, ...props }: Props<T>) {
   const [bodyRef] = useAutoAnimate<HTMLTableSectionElement>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -36,10 +36,11 @@ function Table<T>({ fetcher, fetching, totalCount, records, ...props }: Props<T>
   return (
     <DataTable
       bodyRef={bodyRef}
-      minHeight={120}
+      minHeight={totalCount < 1 ? 150 : 120}
       withTableBorder
       striped
       {...props}
+      columns={[...columns]}
       records={records}
       totalRecords={totalCount}
       fetching={fetching}

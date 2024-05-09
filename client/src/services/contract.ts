@@ -3,7 +3,7 @@ import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
 import { NewContractPayload, NewContractResponse } from "../types/contract";
 import { NewOrganizationResponse, OrganizationPayload, OrganizationsResponse } from "../types/organization";
-import { PaginatedResponse, PaginationQuery, createPaginationSchema } from "../types/pagination";
+import { PaginationQuery, createPaginationSchema } from "../types/pagination";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
 
 const c = initContract();
@@ -88,9 +88,18 @@ export const contract = c.router({
     body: NewClausePayload,
     summary: "Create new clause"
   },
+  updateClause: {
+    method: "PUT",
+    path: "/api/clauses",
+    responses: {
+      200: NewClauseResponse
+    },
+    body: NewClauseResponse,
+    summary: "Update clause"
+  },
   getClauses: {
     method: "GET",
-    path: "/api/clauses/:organizationId",
+    path: "/api/clauses/org/:organizationId",
     query: PaginationQuery,
     responses: {
       200: createPaginationSchema(ClauseResponse),

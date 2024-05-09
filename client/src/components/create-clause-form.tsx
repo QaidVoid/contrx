@@ -1,9 +1,10 @@
-import { Button, LoadingOverlay, Modal, Select, TextInput, Textarea } from "@mantine/core";
+import { Button, Group, LoadingOverlay, Modal, Select, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import useAuth from "../hooks/use-auth";
 import { notifications } from "@mantine/notifications";
 import { NewClausePayload } from "../types/clause";
+import TextEditor from "./super-rich-editor";
 
 type Props = {
   organizationId: string;
@@ -25,7 +26,7 @@ function CreateClauseForm({ organizationId, onCreate }: Props) {
       body: {
         ...data,
         organization_id: organizationId,
-        is_default: false
+        is_default: false,
       },
     });
 
@@ -48,16 +49,27 @@ function CreateClauseForm({ organizationId, onCreate }: Props) {
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Create Clause">
+      <Modal opened={opened} onClose={close} title="Create Clause" size="lg">
         <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Select
-            label="Clause Type"
-            placeholder="Select clause type"
-            size="md"
-            data={["Amendment", "Assignment", "Benefits", "Compliance"]}
-            key={form.key("type")}
-            {...form.getInputProps("type")}
-          />
+          <Group grow>
+            <Select
+              label="Clause Type"
+              placeholder="Select clause type"
+              size="md"
+              data={["Amendment", "Assignment", "Benefits", "Compliance"]}
+              key={form.key("type")}
+              {...form.getInputProps("type")}
+            />
+
+            <TextInput
+              label="Clause Name"
+              placeholder="Clause name"
+              size="md"
+              key={form.key("name")}
+              {...form.getInputProps("name")}
+            />
+          </Group>
+
           <TextInput
             label="Clause Title"
             placeholder="Clause title"
@@ -66,22 +78,13 @@ function CreateClauseForm({ organizationId, onCreate }: Props) {
             key={form.key("title")}
             {...form.getInputProps("title")}
           />
-          <TextInput
-            label="Clause Name"
-            placeholder="Clause name"
-            mt="md"
-            size="md"
-            key={form.key("name")}
-            {...form.getInputProps("name")}
+
+          <TextEditor
+            value={form.values.language}
+            error={form.getInputProps("language").error}
+            onChange={(value) => form.setFieldValue("language", value)}
           />
-          <Textarea
-            label="Language"
-            placeholder="Clause Language"
-            mt="md"
-            size="md"
-            key={form.key("language")}
-            {...form.getInputProps("language")}
-          />
+
           <Button type="submit" fullWidth mt="xl" size="md" disabled={creating}>
             <LoadingOverlay
               visible={creating}
@@ -93,7 +96,9 @@ function CreateClauseForm({ organizationId, onCreate }: Props) {
         </form>
       </Modal>
 
-      <Button bg="blue.6" onClick={open}>Create Clause</Button>
+      <Button bg="blue.6" onClick={open}>
+        Create Clause
+      </Button>
     </>
   );
 }

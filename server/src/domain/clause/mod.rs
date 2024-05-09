@@ -55,7 +55,6 @@ pub struct EditClausePayload {
     pub name: String,
     pub r#type: String,
     pub language: String,
-    pub is_default: bool
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -102,7 +101,7 @@ impl TryFrom<EditClausePayload> for EditClause {
                 name: payload.name,
                 r#type: payload.r#type,
                 language: payload.language,
-                is_default: payload.is_default
+                is_default: false
             })
         } else {
             Err(builder.build())
