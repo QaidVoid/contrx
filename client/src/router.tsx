@@ -7,7 +7,6 @@ import PersistLogin from "./components/persist-login";
 import Application from "./pages/application";
 import AuthGuard from "./components/auth-guard";
 import Contracts from "./pages/contracts";
-import OrganizationInfo from "./pages/organization/organization-info";
 import OrganizationUsers from "./pages/organization/organization-users";
 import OrganizationClauses from "./pages/organization/clauses";
 import OrganizationContract from "./pages/organization/organization-contract";
@@ -66,10 +65,6 @@ export const router = createBrowserRouter([
               {
                 path: "/:organizationId/:contractId",
                 element: <Contracts />,
-              },
-              {
-                path: "/:organizationId/info",
-                element: <OrganizationInfo />
               },
               {
                 path: "/:organizationId/users",

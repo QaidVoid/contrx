@@ -1,27 +1,38 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Table, Checkbox, Menu, MenuItem, Popover, Button, Group, Text } from '@mantine/core';
-import { Link, useParams } from 'react-router-dom';
-import { IconDots } from '@tabler/icons-react';
-import CreateClauseForm from '../../components/create-clause-form';
-import useAuth from '../../hooks/use-auth';
-import { notifications } from '@mantine/notifications';
-import { ClausesResponse } from '../../types/clause';
+import { Stack, Text } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { useCallback, useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import CreateClauseForm from "../../components/create-clause-form";
+import Table from "../../components/table";
+import TitleBar from "../../components/title-bar";
+import useAuth from "../../hooks/use-auth";
+import type { PaginatedClausesResponse } from "../../types/clause";
 
 function OrganizationClauses() {
   const { api } = useAuth();
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const params = useParams();
-  const [clauses, setClauses] = useState<ClausesResponse>([]);
+  const [clauses, setClauses] = useState<PaginatedClausesResponse>({
+    data: [],
+    total_count: 0
+  });
+  const [fetching, { open: fetch, close: completeFetch }] = useDisclosure(false);
+  const [searchParams, _] = useSearchParams();
 
   if (!params.organizationId) return;
 
   const organizationId = params.organizationId;
 
   const fetchClauses = useCallback(async () => {
+    fetch();
     const { body, status } = await api.getClauses({
       params: {
-        organizationId
-      }
+        organizationId,
+      },
+      query: {
+        page: Number(searchParams.get("page") ?? 1),
+        size: Number(searchParams.get("size") ?? 10),
+      },
     });
 
     if (status === 200) {
@@ -29,86 +40,53 @@ function OrganizationClauses() {
     } else {
       notifications.show({
         color: "red",
-        message: "Invalid organization"
-      })
+        message: "Invalid organization",
+      });
     }
-  }, [organizationId, api.getOrganization]);
+    completeFetch();
+  }, [organizationId, api.getClauses, fetch, completeFetch, searchParams]);
 
   useEffect(() => {
     fetchClauses();
-  }, []);
-
-  const handleActionClick = (clauseId: string) => {
-    // Implement your action logic here
-    console.log(`Action clicked for clause ID ${clauseId}`);
-  };
-
-  const actionMenu = (clauseId: string) => (
-    <Menu>
-      <MenuItem onClick={() => handleActionClick(clauseId)}>Download</MenuItem>
-      <MenuItem onClick={() => handleActionClick(clauseId)}>Delete</MenuItem>
-    </Menu>
-  );
-
-  const rows = clauses?.map((clause) => (
-    <Table.Tr
-      key={clause.name}
-      bg={selectedRows.includes(clause.id) ? 'var(--mantine-color-blue-light)' : undefined}
-    >
-      <Table.Td>
-        <Checkbox
-          aria-label="Select row"
-          checked={selectedRows.includes(clause.id)}
-          onChange={(event) =>
-            setSelectedRows(
-              event.currentTarget.checked
-                ? [...selectedRows, clause.id]
-                : selectedRows.filter((position) => position !== clause.id)
-            )
-          }
-        />
-      </Table.Td>
-      <Table.Td><Link to={`/${organizationId}/${clause.name}`} className="color-blue-800">{clause.name}</Link></Table.Td>
-      <Table.Td>{clause.type}</Table.Td>
-      <Table.Td>{clause.last_modified_by}</Table.Td>
-      <Table.Td>{clause.last_modified_at}</Table.Td>
-      <Table.Td>
-        <Popover
-          position="bottom"
-          withArrow
-        >
-          <Popover.Target>
-            <Button size="xs">
-              <IconDots />
-            </Button>
-          </Popover.Target>
-
-          <Popover.Dropdown>
-            {actionMenu(clause.id)}
-          </Popover.Dropdown>
-        </Popover>
-      </Table.Td>
-    </Table.Tr>
-  ));
+  }, [fetchClauses]);
 
   return (
     <>
-      <Group bg="green.6" p={18} justify='space-between'>
+      <TitleBar>
         <Text c="white">Clause Library</Text>
         <CreateClauseForm organizationId={organizationId} onCreate={fetchClauses} />
-      </Group>
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th />
-            <Table.Th>Clause Name</Table.Th>
-            <Table.Th>Clause Type</Table.Th>
-            <Table.Th>Last Modified By</Table.Th>
-            <Table.Th>Last Modified On</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
+      </TitleBar>
+
+      <Stack p="md">
+        <Table
+          records={clauses.data}
+          totalCount={clauses.total_count}
+          fetcher={fetchClauses}
+          fetching={fetching}
+          columns={[
+            {
+              accessor: "name",
+              title: "Clause Name",
+              render: (record) => record.name,
+            },
+            {
+              accessor: "type",
+              title: "Clause Type",
+              render: (record) => record.type,
+            },
+            {
+              accessor: "last_modified_by",
+              title: "Last Modified By",
+              render: (record) => record.last_modified_by,
+            },
+            {
+              accessor: "last_modified_at",
+              title: "Last Modified At",
+              render: (record) => record.last_modified_at,
+            },
+          ]}
+        />
+      </Stack>
     </>
   );
 }

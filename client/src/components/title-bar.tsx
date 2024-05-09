@@ -1,11 +1,10 @@
-import { Group, Text } from "@mantine/core";
+import { Group } from "@mantine/core";
 import type { PropsWithChildren } from "react";
-
 
 function TitleBar({ children }: PropsWithChildren) {
   return (
-    <Group w="100%" bg="blue.6" p={18}>
-        {children}
+    <Group bg="green.6" p={18} justify="space-between">
+      {children}
     </Group>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Checkbox, Menu, MenuItem, Popover, Button } from '@mantine/core';
+import { Table, Checkbox, Menu, MenuItem, Popover, Button, Text } from '@mantine/core';
 import TitleBar from '../../components/title-bar';
 import { Link, useParams } from 'react-router-dom';
 import { IconDots } from '@tabler/icons-react';
@@ -72,7 +72,9 @@ function OrganizationContract() {
 
   return (
     <>
-      <TitleBar title="Contract Types" />
+      <TitleBar>
+        <Text c="white">Contract Types</Text>
+      </TitleBar>
       <Table>
         <Table.Thead>
           <Table.Tr>

@@ -1,12 +1,17 @@
-use time::OffsetDateTime;
 use axum::{
-    extract::{Path, State}, middleware, routing::{get, post, put}, Extension, Json, Router
+    extract::{Path, Query, State},
+    middleware,
+    routing::{get, post},
+    Extension, Json, Router,
 };
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::{
-    domain::{clause::{Clause, CreateClause, CreateClausePayload, OrganizationClause}, organization::{
-    }},
+    domain::{
+        clause::{Clause, CreateClause, CreateClausePayload, OrganizationClause},
+        pagination::{PageCount, PaginatedResponse, Pagination},
+    },
     error::Error,
     middleware::auth::auth_middleware,
     AppState,
@@ -73,9 +78,23 @@ async fn create_clause(
 
 #[axum::debug_handler]
 async fn get_clauses(
+    pagination: Query<Pagination>,
     Path(organization_id): Path<Uuid>,
     State(state): State<AppState>,
-) -> Result<Vec<OrganizationClause>> {
+) -> Result<PaginatedResponse<OrganizationClause>> {
+    let pages = sqlx::query_as!(
+        PageCount,
+        r#"
+            SELECT COUNT(*) AS total_count
+            FROM organizations_clauses oc
+            JOIN organizations o ON oc.organization_id = o.id
+            WHERE o.id = $1
+        "#,
+        organization_id
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
     let clauses = sqlx::query_as!(
         OrganizationClause,
         r#"
@@ -88,12 +107,19 @@ async fn get_clauses(
         JOIN users u
         ON u.id = c.last_modified_by
         WHERE o.id = $1
+        LIMIT $2
+        OFFSET $3
     "#,
-        organization_id
+        organization_id,
+        pagination.size,
+        (pagination.page - 1) * pagination.size
     )
     .fetch_all(&state.pool)
     .await
     .map_err(Error::from)?;
 
-    Ok(Json(clauses))
+    Ok(Json(PaginatedResponse {
+        data: clauses,
+        total_count: pages.total_count,
+    }))
 }

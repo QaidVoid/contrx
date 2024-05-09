@@ -4,7 +4,9 @@ import TitleBar from "../../components/title-bar";
 function OrganizationUsers() {
   return (
     <>
-      <TitleBar title="Organization Users" />
+      <TitleBar>
+        <Text c="white">Users</Text>
+      </TitleBar>
       <Group p="md" grow>
         <Grid columns={3}>
           <Card withBorder p="xl" radius="md">
