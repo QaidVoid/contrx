@@ -1,45 +1,48 @@
-import { Group, Paper, Title, Text, TextInput, Select, Button, LoadingOverlay } from "@mantine/core";
+import { TextInput, Select, Button, LoadingOverlay, Modal } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import useAuth from "../../hooks/use-auth";
-import { OrganizationPayload } from "../../types/organization";
-import countries from "../../lib/countries";
-import { useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
+import useAuth from "../hooks/use-auth";
+import { OrganizationPayload } from "../types/organization";
+import countries from "../lib/countries";
 
-function SetupOrganization() {
+type Props = {
+  onCreate: () => void;
+};
+
+function CreateOrganizationForm({ onCreate }: Props) {
+  const [opened, { open, close }] = useDisclosure(false);
   const form = useForm<OrganizationPayload>({
     mode: "uncontrolled",
     validate: zodResolver(OrganizationPayload),
   });
   const [creating, { open: create, close: finish }] = useDisclosure(false);
   const { api } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (data: OrganizationPayload) => {
     create();
-    const { body, status } = await api.createOrganization({ body: data });
+    const { status } = await api.createOrganization({ body: data });
 
     if (status === 200) {
-      navigate(`/${body.id}/info`);
+      notifications.show({
+        title: "Create Organization",
+        message: "Successfully created organization"
+      })
+      onCreate();
+      close();
     } else {
       notifications.show({
-        color: "red",
+        color: "red.7",
         title: "Create Organization",
-        message: "Failed to create organization"
-      })
+        message: "Failed to create organization",
+      });
     }
     finish();
   };
 
   return (
-    <Group h="100vh" justify="center" align="center">
-      <Paper w="90%" maw="600px">
-        <Title c="blue.8" order={2} ta="center" mt="md" mb={20}>
-          Hello
-          <Text c="gray.8">Start using Contrx by creating your organization.</Text>
-        </Title>
-
+    <>
+      <Modal opened={opened} onClose={close} title="Create Organization">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
             label="Organization Name"
@@ -67,9 +70,13 @@ function SetupOrganization() {
             Save
           </Button>
         </form>
-      </Paper>
-    </Group>
+      </Modal>
+
+      <Button bg="blue.6" onClick={open}>
+        Create Organization
+      </Button>
+    </>
   );
 }
 
-export default SetupOrganization;
+export default CreateOrganizationForm;

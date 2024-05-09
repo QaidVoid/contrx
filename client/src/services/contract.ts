@@ -2,7 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
 import { NewContractPayload, NewContractResponse } from "../types/contract";
-import { OrganizationPayload, NewOrganizationResponse } from "../types/organization";
+import { OrganizationPayload, NewOrganizationResponse, OrganizationsResponse } from "../types/organization";
 import { ClausesResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
 
 const c = initContract();
@@ -69,6 +69,14 @@ export const contract = c.router({
       200: NewOrganizationResponse,
     },
     summary: "Get organization info"
+  },
+  getMyOrganizations: {
+    method: "GET",
+    path: "/api/organizations",
+    responses: {
+      200: OrganizationsResponse
+    },
+    summary: "Get organizations of authenticated users"
   },
   createClause: {
     method: "POST",

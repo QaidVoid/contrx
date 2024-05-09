@@ -7,9 +7,10 @@ import { NewClausePayload } from "../types/clause";
 
 type Props = {
   organizationId: string;
+  onCreate: () => void;
 };
 
-function CreateClauseForm({ organizationId }: Props) {
+function CreateClauseForm({ organizationId, onCreate }: Props) {
   const [opened, { open, close }] = useDisclosure(false);
   const [creating, { open: create, close: finish }] = useDisclosure(false);
   const form = useForm<NewClausePayload>({
@@ -17,11 +18,10 @@ function CreateClauseForm({ organizationId }: Props) {
     validate: zodResolver(NewClausePayload),
   });
   const { api } = useAuth();
-  console.log(form.errors);
 
   const handleSubmit = async (data: NewClausePayload) => {
     create();
-    const { body, status } = await api.createClause({
+    const { status } = await api.createClause({
       body: {
         ...data,
         organization_id: organizationId,
@@ -34,7 +34,7 @@ function CreateClauseForm({ organizationId }: Props) {
         title: "Create Clause",
         message: "Successfully created clause",
       });
-      console.log("RESPONSE", body);
+      onCreate();
       close();
     } else {
       notifications.show({

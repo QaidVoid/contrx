@@ -11,7 +11,6 @@ function Layout() {
       header={{
         height: 60,
       }}
-      padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md">

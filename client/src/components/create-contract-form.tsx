@@ -1,22 +1,17 @@
 import {
   Button,
-  Checkbox,
   LoadingOverlay,
   Modal,
   MultiSelect,
-  PasswordInput,
   Select,
-  Text,
   TextInput,
   Textarea
 } from "@mantine/core";
-import { DateInput, DatePickerInput, DateTimePicker } from "@mantine/dates";
+import { DateInput } from "@mantine/dates";
 import { useForm, zodResolver } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { NewContractPayload } from "../types/contract";
-import { useState } from "react";
 import useAuth from "../hooks/use-auth";
-import { Link } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 
 function CreateContractForm() {

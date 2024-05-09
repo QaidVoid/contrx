@@ -95,7 +95,7 @@ function OrganizationClauses() {
     <>
       <Group bg="green.6" p={18} justify='space-between'>
         <Text c="white">Clause Library</Text>
-        <CreateClauseForm organizationId={organizationId} />
+        <CreateClauseForm organizationId={organizationId} onCreate={fetchClauses} />
       </Group>
       <Table>
         <Table.Thead>

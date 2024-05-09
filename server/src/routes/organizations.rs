@@ -23,6 +23,7 @@ pub fn organizations_router(state: &AppState) -> Router<AppState> {
         .route("/", post(create_organization))
         .route("/", put(update_organization))
         .route("/:organization_id", get(get_organization))
+        .route("/", get(get_organizations))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -112,4 +113,28 @@ async fn get_organization(
     .map_err(Error::from)?;
 
     Ok(Json(organization))
+}
+
+#[axum::debug_handler]
+async fn get_organizations(
+    session_id: Extension<Uuid>,
+    State(state): State<AppState>,
+) -> Result<Vec<Organization>> {
+    let sid = session_id.0;
+
+    let organizations = sqlx::query_as!(
+        Organization,
+        r#"
+            SELECT o.id,o.name,o.country
+            FROM sessions s
+            JOIN users_organizations uo ON s.user_id = uo.user_id
+            JOIN organizations o ON uo.organization_id = o.id
+            WHERE s.id = $1;
+        "#,
+        sid
+    )
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(organizations))
 }

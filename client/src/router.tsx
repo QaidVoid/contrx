@@ -6,9 +6,7 @@ import Layout from "./components/layout";
 import PersistLogin from "./components/persist-login";
 import Application from "./pages/application";
 import AuthGuard from "./components/auth-guard";
-import Dashboard from "./pages/dashboard";
 import Contracts from "./pages/contracts";
-import SetupOrganization from "./pages/organization/setup";
 import OrganizationInfo from "./pages/organization/organization-info";
 import OrganizationUsers from "./pages/organization/organization-users";
 import OrganizationClauses from "./pages/organization/clauses";
@@ -47,6 +45,10 @@ export const router = createBrowserRouter([
                 path: "/app",
                 element: <Application />,
               },
+              // {
+              //   path: "/profile",
+              //   element: <Profile />
+              // }
             ],
           },
           {
@@ -94,10 +96,6 @@ export const router = createBrowserRouter([
                 element: <ChoiceList />
               }
             ]
-          },
-          {
-            path: "/setup/org",
-            element: <SetupOrganization />,
           },
         ],
       },
