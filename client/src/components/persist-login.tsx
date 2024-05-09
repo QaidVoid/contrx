@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/use-auth";
 import { useEffect, useState } from "react";
 import api from "../services/api";
@@ -7,8 +7,6 @@ function PersistLogin() {
   const [isLoading, setIsLoading] = useState(true);
   const { auth, login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
 
   useEffect(() => {
     const verifyRefreshToken = async () => {
@@ -22,13 +20,12 @@ function PersistLogin() {
   }, [login, auth.access_token]);
 
   useEffect(() => {
-    if (auth.access_token && from === "/login") {
+    if (auth.access_token && (window.location.pathname === "/login" || window.location.pathname === "/")) {
       navigate("/app");
+    } else if (auth.access_token) {
+      navigate(window.location.pathname, { replace: true });
     }
-    // else if (auth.access_token) {
-    //   navigate(from, { replace: true });
-    // }
-  }, [auth.access_token, from, navigate]);
+  }, [auth.access_token, navigate]);
 
   return isLoading ? null : <Outlet />;
 }
