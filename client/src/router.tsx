@@ -14,6 +14,7 @@ import OrganizationTemplates from "./pages/organization/organization-templates";
 import ApprovalWorkflows from "./pages/organization/approval-workflows";
 import ChoiceList from "./pages/organization/choice-list";
 import OrganizationDashboard from "./pages/organization/organization-dashboard";
+import OrganizationClause from "./pages/organization/clause/detail";
 
 export const router = createBrowserRouter([
   {
@@ -73,6 +74,10 @@ export const router = createBrowserRouter([
               {
                 path: "/:organizationId/clauses",
                 element: <OrganizationClauses />
+              },
+              {
+                path: "/:organizationId/clause/:clauseId",
+                element: <OrganizationClause />
               },
               {
                 path: "/:organizationId/contract",

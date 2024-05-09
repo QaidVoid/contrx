@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import CreateClauseForm from "../../components/create-clause-form";
 import Table from "../../components/table";
 import TitleBar from "../../components/title-bar";
@@ -79,7 +79,9 @@ function OrganizationClauses() {
             {
               accessor: "name",
               title: "Clause Name",
-              render: (record) => record.name,
+              render: (record) => {
+                return <Link to={`/${organizationId}/clause/${record.id}`}>{record.name}</Link>;
+              },
             },
             {
               accessor: "type",
@@ -110,12 +112,7 @@ function OrganizationClauses() {
                   >
                     <IconEdit size={16} />
                   </ActionIcon>
-                  <ActionIcon
-                    size="sm"
-                    variant="subtle"
-                    color="red"
-                    onClick={() => {}}
-                  >
+                  <ActionIcon size="sm" variant="subtle" color="red" onClick={() => { }}>
                     <IconTrash size={16} />
                   </ActionIcon>
                 </Group>

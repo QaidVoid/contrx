@@ -26,6 +26,7 @@ pub fn clauses_router(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/", post(create_clause))
         .route("/org/:organization_id", get(get_clauses))
+        .route("/:clause_id", get(get_clause))
         .route("/:clause_id", delete(remove_clause))
         .route("/", put(update_clause))
         .route_layer(middleware::from_fn_with_state(
@@ -128,6 +129,32 @@ async fn get_clauses(
         data: clauses,
         total_count: pages.total_count,
     }))
+}
+
+#[axum::debug_handler]
+async fn get_clause(
+    Path(clause_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<OrganizationClause> {
+    let clause = sqlx::query_as!(
+        OrganizationClause,
+        r#"
+        SELECT c.id, c.title, c.name, c.type, c.language, c.is_default, c.last_modified_at, o.id as organization_id, concat_ws(' ', u.first_name, u.last_name) as last_modified_by
+        FROM organizations_clauses oc
+        JOIN organizations o
+        ON oc.organization_id = o.id
+        JOIN clauses c
+        ON oc.clause_id = c.id
+        JOIN users u
+        ON u.id = c.last_modified_by
+        WHERE c.id = $1
+    "#,
+        clause_id,
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    Ok(Json(clause))
 }
 
 #[axum::debug_handler]

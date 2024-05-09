@@ -106,6 +106,14 @@ export const contract = c.router({
     },
     summary: "Get organization info"
   },
+  getClause: {
+    method: "GET",
+    path: "/api/clauses/:clauseId",
+    responses: {
+      200: ClauseResponse
+    },
+    summary: "Get organization info"
+  },
   createContract: {
     method: "POST",
     path: "/api/contracts",
