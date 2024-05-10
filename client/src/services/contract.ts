@@ -5,6 +5,7 @@ import { NewContractPayload, NewContractResponse } from "../types/contract";
 import { NewOrganizationResponse, OrganizationPayload, OrganizationsResponse } from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
+import { ContractType, NewContractTypePayload, TemplateWithClause } from "../types/contract-type";
 
 const c = initContract();
 
@@ -113,6 +114,31 @@ export const contract = c.router({
       200: ClauseResponse
     },
     summary: "Get organization info"
+  },
+  createContractType: {
+    method: "POST",
+    path: "/api/templates",
+    responses: {
+      200: ContractType
+    },
+    body: NewContractTypePayload
+  },
+  getTemplates: {
+    method: "GET",
+    path: "/api/templates",
+    query: PaginationQuery,
+    responses: {
+      200: createPaginationSchema(ContractType),
+    },
+    summary: "Get organization info"
+  },
+  getTemplate: {
+    method: "GET",
+    path: "/api/templates/:templateId",
+    responses: {
+      200: TemplateWithClause
+    },
+    summary: "Get template"
   },
   createContract: {
     method: "POST",

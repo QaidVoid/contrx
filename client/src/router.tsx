@@ -16,6 +16,7 @@ import ChoiceList from "./pages/organization/choice-list";
 import OrganizationDashboard from "./pages/organization/organization-dashboard";
 import OrganizationClause from "./pages/organization/clause/detail";
 import CreateContractType from "./pages/organization/contract/create";
+import EditContractType from "./pages/organization/contract/edit";
 
 export const router = createBrowserRouter([
   {
@@ -87,6 +88,10 @@ export const router = createBrowserRouter([
               {
                 path: "/:organizationId/contract/new",
                 element: <CreateContractType />
+              },
+              {
+                path: "/:organizationId/contract/:templateId",
+                element: <EditContractType />
               },
               {
                 path: "/:organizationId/templates",

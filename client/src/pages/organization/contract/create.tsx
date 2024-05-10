@@ -1,25 +1,57 @@
-import { Button, Group, Select, Stack, Stepper, Text, TextInput } from "@mantine/core";
-import TitleBar from "../../../components/title-bar";
-import { useCallback, useState } from "react";
+import { Box, Button, Group, Select, Stack, Text, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
-import { NewContractTypePayload } from "../../../types/contract-type";
+import { useCallback } from "react";
 import { match } from "ts-pattern";
+import TitleBar from "../../../components/title-bar";
+import useAuth from "../../../hooks/use-auth";
+import { NewContractTypeForm, parseContractType } from "../../../types/contract-type";
+import { notifications } from "@mantine/notifications";
+import { useNavigate, useParams } from "react-router-dom";
 
 function CreateContractType() {
-  const [active, setActive] = useState(0);
-  const nextStep = () => setActive((current) => (current < 1 ? current + 1 : current));
-  const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
+  const { api } = useAuth();
+  const navigate = useNavigate();
+  const params = useParams();
 
-  const form = useForm<NewContractTypePayload>({
+  if (!params.organizationId) return;
+
+  const organizationId = params.organizationId;
+
+  const form = useForm<NewContractTypeForm>({
     mode: "uncontrolled",
-    validate: zodResolver(NewContractTypePayload),
+    validate: zodResolver(NewContractTypeForm),
   });
 
-  const handleSubmit = useCallback((data: NewContractTypePayload) => {
-    console.log(NewContractTypePayload.parse(data));
-  }, []);
+  console.log("ERROR:", form.errors);
+  console.log("VALUES:", form.values);
 
-  const handlePartyChange = (value: string, partyA = true) => {
+  const handleSubmit = useCallback(
+    async (data: NewContractTypeForm) => {
+      const validated = parseContractType(data);
+
+      const { body, status } = await api.createContractType({
+        body: validated,
+      });
+
+      if (status === 200) {
+        notifications.show({
+          title: "Contract Type",
+          message: "Contract type created successfully",
+        });
+
+        navigate(`${organizationId}/contract/${body.id}`, { replace: true });
+      } else {
+        notifications.show({
+          color: "red.5",
+          title: "Contract Type",
+          message: "Failed to create contract type",
+        });
+      }
+    },
+    [organizationId, api.createContractType, navigate],
+  );
+
+  const handlePartyChange = (value: string | null, partyA = true) => {
     match({ value, partyA })
       .with(
         {
@@ -27,7 +59,7 @@ function CreateContractType() {
           partyA: true,
         },
         () => {
-          form.setFieldValue("party_b_is_self", "CounterParty");
+          form.setFieldValue("party_b", "CounterParty");
         },
       )
       .with(
@@ -36,96 +68,80 @@ function CreateContractType() {
           partyA: true,
         },
         () => {
-          form.setFieldValue("party_b_is_self", "My Organization");
+          form.setFieldValue("party_b", "My Organization");
         },
       )
       .with({ value: "My Organization", partyA: false }, () => {
-        form.setFieldValue("party_a_is_self", "CounterParty");
+        form.setFieldValue("party_a", "CounterParty");
       })
       .with({ value: "CounterParty", partyA: false }, () => {
-        form.setFieldValue("party_a_is_self", "My Organization");
+        form.setFieldValue("party_a", "My Organization");
       });
   };
 
   return (
     <>
       <TitleBar>
-        <Text>New Contract Type</Text>
+        <Text c="white">New Contract Type</Text>
       </TitleBar>
 
-      <Stack p="md" w="600px">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
-            <Stepper.Step label="Basic Details" description="Basic contract details">
-              <TextInput
-                label="Name"
-                placeholder="Contract Name"
-                size="md"
-                key={form.key("name")}
-                {...form.getInputProps("name")}
-              />
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Stack p="md" gap={16}>
+          <TextInput
+            label="Name"
+            placeholder="Contract Name"
+            size="md"
+            key={form.key("name")}
+            {...form.getInputProps("name")}
+          />
 
-              <Select
-                searchable
-                label="Category"
-                placeholder="Select category"
-                size="md"
-                data={["Business", "Human Resource", "Products", "Services"]}
-                key={form.key("category")}
-                {...form.getInputProps("category")}
-              />
+          <Select
+            searchable
+            label="Category"
+            placeholder="Select category"
+            size="md"
+            data={["Business", "Human Resource", "Products", "Services"]}
+            key={form.key("category")}
+            {...form.getInputProps("category")}
+          />
 
-              <Select
-                searchable
-                label="Intent"
-                placeholder="Select intent"
-                size="md"
-                data={["Buy", "Sell", "Other"]}
-                key={form.key("intent")}
-                {...form.getInputProps("intent")}
-              />
+          <Select
+            searchable
+            label="Intent"
+            placeholder="Select intent"
+            size="md"
+            data={["Buy", "Sell", "Other"]}
+            key={form.key("intent")}
+            {...form.getInputProps("intent")}
+          />
 
-              <Group grow>
-                <Select
-                  label="Party A"
-                  placeholder="Select party"
-                  size="md"
-                  data={["My Organization", "CounterParty"]}
-                  key={form.key("party_a_is_self")}
-                  {...form.getInputProps("party_a_is_self")}
-                  onChange={(v) => handlePartyChange(v)}
-                />
+          <Group align="start" grow>
+            <Select
+              label="Party A"
+              placeholder="Select party"
+              size="md"
+              data={["My Organization", "CounterParty"]}
+              key={form.key("party_a")}
+              {...form.getInputProps("party_a")}
+              onChange={(v) => handlePartyChange(v)}
+            />
 
-                <Select
-                  label="Party B"
-                  placeholder="Select party"
-                  size="md"
-                  data={["My Organization", "CounterParty"]}
-                  key={form.key("party_b_is_self")}
-                  {...form.getInputProps("party_b_is_self")}
-                  onChange={(v) => handlePartyChange(v, false)}
-                />
-              </Group>
-            </Stepper.Step>
-            <Stepper.Step label="Template" description="Contract Template">
-              Tmplate
-            </Stepper.Step>
-          </Stepper>
-
-          <Group justify="center" mt="xl">
-            <Button key="back" variant="default" onClick={prevStep}>
-              Back
-            </Button>
-            {active === 1 ? (
-              <Button type="submit">Finish</Button>
-            ) : (
-              <Button key="step" onClick={nextStep}>
-                Next step
-              </Button>
-            )}
+            <Select
+              label="Party B"
+              placeholder="Select party"
+              size="md"
+              data={["My Organization", "CounterParty"]}
+              key={form.key("party_b")}
+              {...form.getInputProps("party_b")}
+              onChange={(v) => handlePartyChange(v, false)}
+            />
           </Group>
-        </form>
-      </Stack>
+
+          <Box>
+            <Button type="submit">Save</Button>
+          </Box>
+        </Stack>
+      </form>
     </>
   );
 }

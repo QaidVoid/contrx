@@ -36,7 +36,7 @@ function Table<T>({ fetcher, fetching, totalCount, records, columns, ...props }:
   return (
     <DataTable
       bodyRef={bodyRef}
-      minHeight={totalCount < 1 ? 150 : 120}
+      minHeight={totalCount < 1 ? 200 : 120}
       withTableBorder
       striped
       {...props}

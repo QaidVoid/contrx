@@ -10,7 +10,6 @@ export const NewClausePayload = z.object({
   is_default: z.boolean().default(false)
 });
 
-
 export type NewClausePayload = z.infer<typeof NewClausePayload>;
 
 export const NewClauseResponse = NewClausePayload.extend({

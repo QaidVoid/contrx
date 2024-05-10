@@ -11,6 +11,7 @@ use crate::AppState;
 use self::clauses::clauses_router;
 use self::contracts::contracts_router;
 use self::organizations::organizations_router;
+use self::templates::templates_router;
 use self::{auth::auth_router, users::users_router};
 
 mod auth;
@@ -52,6 +53,7 @@ pub fn create_router(state: AppState) -> Router {
         .nest("/api/organizations", organizations_router(&state))
         .nest("/api/clauses", clauses_router(&state))
         .nest("/api/contracts", contracts_router())
+        .nest("/api/templates", templates_router(&state))
         .fallback(not_found)
         .with_state(state)
         .layer(cors)
