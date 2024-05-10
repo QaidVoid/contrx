@@ -1,9 +1,9 @@
 import { Button, Group, Select, Stack, Stepper, Text, TextInput } from "@mantine/core";
 import TitleBar from "../../../components/title-bar";
-import { useState } from "react";
-import BasicContractDetail from "../../../components/contract/basic-detail";
+import { useCallback, useState } from "react";
 import { useForm, zodResolver } from "@mantine/form";
 import { NewContractTypePayload } from "../../../types/contract-type";
+import { match } from "ts-pattern";
 
 function CreateContractType() {
   const [active, setActive] = useState(0);
@@ -15,6 +15,38 @@ function CreateContractType() {
     validate: zodResolver(NewContractTypePayload),
   });
 
+  const handleSubmit = useCallback((data: NewContractTypePayload) => {
+    console.log(NewContractTypePayload.parse(data));
+  }, []);
+
+  const handlePartyChange = (value: string, partyA = true) => {
+    match({ value, partyA })
+      .with(
+        {
+          value: "My Organization",
+          partyA: true,
+        },
+        () => {
+          form.setFieldValue("party_b_is_self", "CounterParty");
+        },
+      )
+      .with(
+        {
+          value: "CounterParty",
+          partyA: true,
+        },
+        () => {
+          form.setFieldValue("party_b_is_self", "My Organization");
+        },
+      )
+      .with({ value: "My Organization", partyA: false }, () => {
+        form.setFieldValue("party_a_is_self", "CounterParty");
+      })
+      .with({ value: "CounterParty", partyA: false }, () => {
+        form.setFieldValue("party_a_is_self", "My Organization");
+      });
+  };
+
   return (
     <>
       <TitleBar>
@@ -22,7 +54,7 @@ function CreateContractType() {
       </TitleBar>
 
       <Stack p="md" w="600px">
-        <form onSubmit={console.log}>
+        <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
             <Stepper.Step label="Basic Details" description="Basic contract details">
               <TextInput
@@ -34,6 +66,7 @@ function CreateContractType() {
               />
 
               <Select
+                searchable
                 label="Category"
                 placeholder="Select category"
                 size="md"
@@ -43,6 +76,7 @@ function CreateContractType() {
               />
 
               <Select
+                searchable
                 label="Intent"
                 placeholder="Select intent"
                 size="md"
@@ -59,6 +93,7 @@ function CreateContractType() {
                   data={["My Organization", "CounterParty"]}
                   key={form.key("party_a_is_self")}
                   {...form.getInputProps("party_a_is_self")}
+                  onChange={(v) => handlePartyChange(v)}
                 />
 
                 <Select
@@ -68,6 +103,7 @@ function CreateContractType() {
                   data={["My Organization", "CounterParty"]}
                   key={form.key("party_b_is_self")}
                   {...form.getInputProps("party_b_is_self")}
+                  onChange={(v) => handlePartyChange(v, false)}
                 />
               </Group>
             </Stepper.Step>
@@ -83,7 +119,9 @@ function CreateContractType() {
             {active === 1 ? (
               <Button type="submit">Finish</Button>
             ) : (
-              <Button key="step" onClick={nextStep}>Next step</Button>
+              <Button key="step" onClick={nextStep}>
+                Next step
+              </Button>
             )}
           </Group>
         </form>

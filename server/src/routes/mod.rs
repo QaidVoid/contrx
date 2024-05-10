@@ -17,6 +17,7 @@ mod auth;
 mod clauses;
 mod contracts;
 mod organizations;
+mod templates;
 mod users;
 
 async fn not_found() -> StatusCode {
