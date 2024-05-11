@@ -39,7 +39,7 @@ function CreateContractType() {
           message: "Contract type created successfully",
         });
 
-        navigate(`${organizationId}/contract/${body.id}`, { replace: true });
+        navigate(`/${organizationId}/contract-types/${body.id}`, { replace: true });
       } else {
         notifications.show({
           color: "red.5",
@@ -59,6 +59,7 @@ function CreateContractType() {
           partyA: true,
         },
         () => {
+          form.setFieldValue("party_a", "My Organization");
           form.setFieldValue("party_b", "CounterParty");
         },
       )
@@ -68,14 +69,17 @@ function CreateContractType() {
           partyA: true,
         },
         () => {
+          form.setFieldValue("party_a", "CounterParty");
           form.setFieldValue("party_b", "My Organization");
         },
       )
       .with({ value: "My Organization", partyA: false }, () => {
         form.setFieldValue("party_a", "CounterParty");
+        form.setFieldValue("party_b", "My Organization");
       })
       .with({ value: "CounterParty", partyA: false }, () => {
         form.setFieldValue("party_a", "My Organization");
+        form.setFieldValue("party_b", "CounterParty");
       });
   };
 

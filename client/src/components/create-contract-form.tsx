@@ -1,35 +1,42 @@
-import {
-  Button,
-  LoadingOverlay,
-  Modal,
-  Select,
-  Stack,
-  TextInput,
-  Textarea,
-} from "@mantine/core";
+import { Button, LoadingOverlay, Modal, Select, Stack, TextInput, Textarea } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useForm, zodResolver } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { NewContractPayload } from "../types/contract";
+import { NewContractForm, NewContractPayload } from "../types/contract";
 import useAuth from "../hooks/use-auth";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useState } from "react";
 import type { ContractType } from "../types/contract-type";
+import type { CounterParty } from "../types/organization";
+import { useParams } from "react-router-dom";
+import { dateToOffset } from "../lib";
 
 function CreateContractForm() {
   const [opened, { open, close }] = useDisclosure(false);
   const [creating, { open: create, close: finish }] = useDisclosure(false);
-  const form = useForm<NewContractPayload>({
+  const form = useForm<NewContractForm>({
     mode: "uncontrolled",
-    validate: zodResolver(NewContractPayload),
+    validate: zodResolver(NewContractForm),
   });
   const [contractTypes, setContractTypes] = useState<ContractType[]>([]);
+  const [counterParties, setCounterParties] = useState<CounterParty[]>([]);
   const { api } = useAuth();
+  const params = useParams();
 
-  const handleSubmit = async (data: NewContractPayload) => {
+  if (!params.organizationId) return;
+
+  const organizationId = params.organizationId;
+
+  form.setFieldValue("organization_id", organizationId);
+
+  const handleSubmit = async (data: NewContractForm) => {
     create();
     const { body, status } = await api.createContract({
-      body: data,
+      body: {
+        ...data,
+        effective_date: dateToOffset(data.effective_date),
+        end_date: dateToOffset(data.end_date),
+      },
     });
 
     if (status === 200) {
@@ -37,7 +44,6 @@ function CreateContractForm() {
         title: "Create Contract",
         message: "Successfully created contract",
       });
-      console.log("RESPONSE", body);
     } else {
       notifications.show({
         color: "red.7",
@@ -48,6 +54,7 @@ function CreateContractForm() {
     finish();
   };
 
+  console.log(form.errors);
   const fetchContractTypes = useCallback(async () => {
     const { body, status } = await api.getTemplates({
       query: {
@@ -67,9 +74,31 @@ function CreateContractForm() {
     }
   }, [api.getTemplates]);
 
+  const fetchCounterParties = useCallback(async () => {
+    const { body, status } = await api.getCounterParties({
+      params: {
+        organizationId,
+      },
+      query: {
+        page: 1,
+        size: 100,
+      },
+    });
+
+    if (status === 200) {
+      setCounterParties(body.data);
+    } else {
+      notifications.show({
+        color: "red",
+        message: "Invalid organization",
+      });
+    }
+  }, [organizationId, api.getCounterParties]);
+
   useEffect(() => {
     fetchContractTypes();
-  }, [fetchContractTypes]);
+    fetchCounterParties();
+  }, [fetchContractTypes, fetchCounterParties]);
 
   return (
     <>
@@ -81,8 +110,8 @@ function CreateContractForm() {
               placeholder="Select contract type"
               size="md"
               data={contractTypes.map((c) => ({ value: c.id, label: c.name }))}
-              key={form.key("contract_type")}
-              {...form.getInputProps("contract_type")}
+              key={form.key("contract_type_id")}
+              {...form.getInputProps("contract_type_id")}
             />
             <TextInput
               label="Contract Title"
@@ -106,20 +135,20 @@ function CreateContractForm() {
               {...form.getInputProps("effective_date")}
             />
             <DateInput
-              label="Expiry Date"
-              placeholder="Pick contract expiry date"
+              label="End Date"
+              placeholder="Pick contract end date"
               size="md"
-              key={form.key("expiry_date")}
-              {...form.getInputProps("expiry_date")}
+              key={form.key("end_date")}
+              {...form.getInputProps("end_date")}
             />
             <Select
               searchable
               label="Counterparty"
               placeholder="Select"
               size="md"
-              data={["Me", "You"]}
-              key={form.key("counterparty")}
-              {...form.getInputProps("counterparty")}
+              data={counterParties.map((c) => ({ value: c.id, label: c.name }))}
+              key={form.key("counterparty_id")}
+              {...form.getInputProps("counterparty_id")}
             />
             <Button type="submit" fullWidth size="md" disabled={creating}>
               <LoadingOverlay

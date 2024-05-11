@@ -1,15 +1,18 @@
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
+use uuid::Uuid;
 
 use crate::error::Error;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CreateContractPayload {
-    pub contract_type: String,
+    pub organization_id: Uuid,
+    pub contract_type_id: Uuid,
     pub title: String,
     pub description: String,
-    pub effective_date: String,
-    pub expiry_date: String,
-    pub counterparty: String
+    pub effective_date: OffsetDateTime,
+    pub end_date: Option<OffsetDateTime>,
+    pub counterparty_id: Uuid
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -21,24 +24,29 @@ pub enum ContractStatus {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Contract {
-    pub contract_type: String,
+    pub id: Uuid,
+    pub contract_type_id: Uuid,
+    pub organization_id: Uuid,
     pub title: String,
     pub description: String,
-    pub effective_date: String,
-    pub counterparty: String,
-    pub expiry_date: String,
-    pub status: ContractStatus,
-    pub blockchain_hash: String,
+    pub definite_term: bool,
+    pub counterparty_id: Uuid,
+    pub counterparty_name: String,
+    pub effective_date: OffsetDateTime,
+    pub renewable: bool,
+    pub end_date: Option<OffsetDateTime>,
+    pub status: String
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CreateContract {
-    pub contract_type: String,
+    pub organization_id: Uuid,
+    pub contract_type_id: Uuid,
     pub title: String,
     pub description: String,
-    pub effective_date: String,
-    pub expiry_date: String,
-    pub counterparty: String
+    pub effective_date: OffsetDateTime,
+    pub end_date: Option<OffsetDateTime>,
+    pub counterparty_id: Uuid
 }
 
 
@@ -50,12 +58,13 @@ impl TryFrom<CreateContractPayload> for CreateContract {
 
         if builder.is_empty() {
             Ok(CreateContract {
-                contract_type: payload.contract_type,
+                organization_id: payload.organization_id,
+                contract_type_id: payload.contract_type_id,
                 title: payload.title,
                 description: payload.description,
                 effective_date: payload.effective_date,
-                expiry_date: payload.expiry_date,
-                counterparty: payload.counterparty
+                end_date: payload.end_date,
+                counterparty_id: payload.counterparty_id
             })
         } else {
             Err(builder.build())

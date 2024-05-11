@@ -1,7 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
-import { NewContractPayload, NewContractResponse } from "../types/contract";
+import { Contract, NewContractPayload, NewContractResponse } from "../types/contract";
 import { CounterParty, NewCounterPartyPayload, NewOrganizationResponse, OrganizationPayload, OrganizationsResponse, PaginatedCounterParties } from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
@@ -174,5 +174,14 @@ export const contract = c.router({
     },
     body: NewContractPayload,
     summary: "Create new contract"
+  },
+  getContracts: {
+    method: "GET",
+    path: "/api/contracts/:organizationId",
+    query: PaginationQuery,
+    responses: {
+      200: createPaginationSchema(Contract),
+    },
+    summary: "Get organization info"
   },
 });
