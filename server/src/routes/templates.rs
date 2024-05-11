@@ -1,15 +1,17 @@
 use axum::{
     extract::{Path, Query, State},
     middleware,
-    routing::{get, post},
+    routing::{get, post, put},
     Json, Router,
 };
 
 use crate::{
     domain::{
-        clause::OrganizationClause, pagination::{PageCount, PaginatedResponse, Pagination}, template::{
-            CreateTemplate, CreateTemplatePayload, Template, TemplateClauses, TemplateWithClauses,
-        }
+        clause::OrganizationClause,
+        pagination::{PageCount, PaginatedResponse, Pagination},
+        template::{
+            CreateTemplate, CreateTemplatePayload, Template, TemplateWithClauses,
+        },
     },
     error::Error,
     middleware::auth::auth_middleware,
@@ -23,6 +25,7 @@ pub fn templates_router(state: &AppState) -> Router<AppState> {
         .route("/", post(create_template))
         .route("/:template_id", get(get_template))
         .route("/", get(get_templates))
+        .route("/", put(update_template))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -135,6 +138,38 @@ async fn get_templates(
 
     Ok(Json(PaginatedResponse {
         data,
-        total_count: pages.total_count
+        total_count: pages.total_count,
     }))
+}
+
+async fn update_template(
+    State(state): State<AppState>,
+    Json(payload): Json<TemplateWithClauses>,
+) -> Result<()> {
+    let mut tx = state.pool.begin().await?;
+
+    sqlx::query!(
+        "DELETE FROM contract_clauses WHERE contract_type_id=$1",
+        payload.contract_type.id
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    for (i, v) in payload.clauses.iter().enumerate() {
+        sqlx::query!(
+            r#"INSERT INTO contract_clauses
+            (contract_type_id, clause_id, clause_order)
+            VALUES
+            ($1, $2, $3)"#,
+            payload.contract_type.id,
+            v.id,
+            i as i32
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    tx.commit().await?;
+
+    Ok(Json(()))
 }

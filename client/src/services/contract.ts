@@ -5,7 +5,7 @@ import { NewContractPayload, NewContractResponse } from "../types/contract";
 import { NewOrganizationResponse, OrganizationPayload, OrganizationsResponse } from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
-import { ContractType, NewContractTypePayload, TemplateWithClause } from "../types/contract-type";
+import { ContractType, NewContractTypePayload, TemplateWithClause, TemplateWithClausePayload } from "../types/contract-type";
 
 const c = initContract();
 
@@ -139,6 +139,15 @@ export const contract = c.router({
       200: TemplateWithClause
     },
     summary: "Get template"
+  },
+  updateTemplate: {
+    method: "PUT",
+    path: "/api/templates",
+    body: TemplateWithClausePayload,
+    responses: {
+      200: null
+    },
+    summary: "Update template"
   },
   createContract: {
     method: "POST",

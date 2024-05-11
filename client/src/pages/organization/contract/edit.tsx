@@ -1,27 +1,28 @@
 import {
   ActionIcon,
   AppShell,
+  Box,
   Button,
-  Card,
+  Center,
   Divider,
   Group,
-  List,
   Modal,
   Paper,
   Stack,
   Text,
-  TextInput,
+  Title,
 } from "@mantine/core";
-import { useForm, zodResolver } from "@mantine/form";
 import { useCallback, useEffect, useState } from "react";
 import TitleBar from "../../../components/title-bar";
 import useAuth from "../../../hooks/use-auth";
-import { TemplateWithClausePayload, type TemplateWithClause } from "../../../types/contract-type";
+import type { TemplateWithClause } from "../../../types/contract-type";
 import { notifications } from "@mantine/notifications";
 import { useNavigate, useParams } from "react-router-dom";
-import { IconFilePlus, IconTrash } from "@tabler/icons-react";
+import { IconFilePlus, IconGripVertical, IconTrash } from "@tabler/icons-react";
 import type { ClauseResponse, PaginatedClausesResponse } from "../../../types/clause";
 import RenderHTML from "../../../components/html-content";
+import { useListState } from "@mantine/hooks";
+import { Draggable, DragDropContext, Droppable } from "@hello-pangea/dnd";
 
 function EditContractType() {
   const [showModal, setShowModal] = useState(false);
@@ -34,21 +35,11 @@ function EditContractType() {
     total_count: 0,
   });
   const [selectedClause, setSelectedClause] = useState<ClauseResponse>();
+  const [state, handlers] = useListState<ClauseResponse>();
 
   if (!params.templateId || !params.organizationId) return;
 
   const { templateId, organizationId } = params;
-
-  const form = useForm<TemplateWithClausePayload>({
-    mode: "uncontrolled",
-    validate: zodResolver(TemplateWithClausePayload),
-  });
-
-  useEffect(() => {
-    if (template && !form.initialized) {
-      form.initialize(template);
-    }
-  }, [template, form.initialize, form.initialized]);
 
   const fetchTemplate = useCallback(async () => {
     const { body, status } = await api.getTemplate({
@@ -59,13 +50,14 @@ function EditContractType() {
 
     if (status === 200) {
       setTemplate(body);
+      handlers.setState(body.clauses);
     } else {
       notifications.show({
         color: "red",
         message: "Failed to fetch contract types",
       });
     }
-  }, [api.getTemplate, templateId]);
+  }, [api.getTemplate, templateId, handlers.setState]);
 
   const fetchClauses = useCallback(async () => {
     const { body, status } = await api.getClauses({
@@ -103,32 +95,47 @@ function EditContractType() {
     fetchClauses();
   }, [fetchTemplate, fetchClauses]);
 
-  const handleSubmit = useCallback(async (data: any) => {
-    console.log(data);
-  }, []);
+  const handleSubmit = useCallback(async () => {
+    if (!template) return;
 
-  if (!form.initialized) return;
+    const { status } = await api.updateTemplate({
+      body: {
+        contract_type: template.contract_type,
+        clauses: state
+      }
+    });
 
-  const fields = form.getValues().clauses.map((item, idx) => (
-    <Group key={item.id} mt="xs">
-      <Stack flex={1}>
-        <TextInput
-          hidden
-          placeholder="Clause"
-          style={{ flex: 1 }}
-          key={form.key(`clauses.${idx}.id`)}
-          {...form.getInputProps(`clauses.${idx}.id`)}
-        />
+    if (status === 200) {
+      notifications.show({
+        title: "Template",
+        message: "Updated successfully"
+      });
+    } else {
+      notifications.show({
+        color: "red.5",
+        title: "Template",
+        message: "Failed to update"
+      });
+    }
+  }, [api.updateTemplate, template, state]);
 
-        <Paper withBorder p={18}>
-          <Stack>
-            <Text fw="bold">{item.title}</Text>
+  const items = state.map((item, idx) => (
+    <Group key={item.id} py={8}>
+      <Draggable index={idx} draggableId={item.id}>
+        {(provided, _snapshot) => (
+          <Stack flex={1} {...provided.draggableProps} ref={provided.innerRef}>
+            <Group>
+              <Box {...provided.dragHandleProps}>
+                <IconGripVertical />
+              </Box>
+              <Title order={2}>{item.title}</Title>
+            </Group>
             <RenderHTML content={item.language} />
           </Stack>
-        </Paper>
-      </Stack>
+        )}
+      </Draggable>
 
-      <ActionIcon color="red" onClick={() => form.removeListItem("clauses", idx)}>
+      <ActionIcon color="red" onClick={() => handlers.remove(idx)}>
         <IconTrash size="1rem" />
       </ActionIcon>
     </Group>
@@ -138,6 +145,12 @@ function EditContractType() {
     <>
       <TitleBar>
         <Text c="white">Edit Template</Text>
+
+        <Button
+          onClick={handleSubmit}
+        >
+          Save
+        </Button>
       </TitleBar>
 
       <Modal
@@ -186,8 +199,9 @@ function EditContractType() {
             <Group h="100%" w="100%" justify="end" align="center" px="md">
               {selectedClause && (
                 <Button
+                  disabled={!!state.find((c) => c.id === selectedClause.id)}
                   onClick={() => {
-                    form.insertListItem("clauses", selectedClause);
+                    handlers.append(selectedClause);
                     setShowModal(false);
                   }}
                 >
@@ -198,16 +212,44 @@ function EditContractType() {
           </AppShell.Footer>
         </AppShell>
       </Modal>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack p="md" gap={16}>
-          {fields}
 
-          <Button onClick={() => setShowModal(true)}>
-            <IconFilePlus size="1.5rem" />
-            <span>Add clause</span>
-          </Button>
+      <Center>
+        <Stack w="50%" miw="900px" p="md" gap={16}>
+          <Stack gap={0}>
+            <Paper withBorder p={18}>
+              <Center>
+                <Title>{template?.contract_type.name}</Title>
+              </Center>
+              <DragDropContext
+                onDragEnd={({ destination, source }) =>
+                  handlers.reorder({ from: source.index, to: destination?.index || 0 })
+                }
+              >
+                <Droppable droppableId="dnd-list" direction="vertical">
+                  {(provided) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                      {items}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+
+              <Center>
+                <Button
+                  onClick={() => {
+                    setSelectedClause(clauses.data[0]);
+                    setShowModal(true);
+                  }}
+                >
+                  <IconFilePlus size="1.5rem" />
+                  <span>Add clause</span>
+                </Button>
+              </Center>
+            </Paper>
+          </Stack>
         </Stack>
-      </form>
+      </Center>
     </>
   );
 }
