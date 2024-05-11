@@ -18,6 +18,7 @@ import OrganizationClause from "./pages/organization/clause/detail";
 import CreateContractType from "./pages/organization/contract/create";
 import EditContractType from "./pages/organization/contract/edit";
 import CounterParties from "./pages/organization/counterparties";
+import ContractSummary from "./pages/organization/contracts/summary";
 
 export const router = createBrowserRouter([
   {
@@ -67,8 +68,8 @@ export const router = createBrowserRouter([
                 element: <Contracts />,
               },
               {
-                path: "/:organizationId/:contractId",
-                element: <Contracts />,
+                path: "/:organizationId/contract/:contractId",
+                element: <ContractSummary />,
               },
               {
                 path: "/:organizationId/users",

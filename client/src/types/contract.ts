@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { createPaginationSchema } from "./pagination";
-import { dateToOffset } from "../lib";
 
 export const NewContractForm = z.object({
   organization_id: z.string(),
@@ -43,6 +42,7 @@ export const Contract = z.object({
   end_date: z.array(z.number()),
   renewable: z.boolean(),
   status: z.string(),
+  document: z.any()
 });
 
 export type Contract = z.infer<typeof Contract>;

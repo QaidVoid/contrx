@@ -9,5 +9,6 @@ CREATE TABLE contracts (
   effective_date TIMESTAMPTZ NOT NULL,
   end_date TIMESTAMPTZ,
   renewable BOOLEAN NOT NULL,
-  status TEXT NOT NULL
+  status TEXT NOT NULL,
+  document JSONB
 );

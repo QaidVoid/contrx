@@ -182,6 +182,14 @@ export const contract = c.router({
     responses: {
       200: createPaginationSchema(Contract),
     },
-    summary: "Get organization info"
+    summary: "Get contracts"
+  },
+  getContract: {
+    method: "GET",
+    path: "/api/contracts/single/:contractId",
+    responses: {
+      200: Contract,
+    },
+    summary: "Get contract"
   },
 });

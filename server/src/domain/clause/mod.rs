@@ -9,7 +9,7 @@ pub struct CreateClausePayload {
     pub title: String,
     pub name: String,
     pub r#type: String,
-    pub language: String,
+    pub language: sqlx::types::JsonValue,
     pub is_default: bool,
 }
 
@@ -19,7 +19,7 @@ pub struct CreateClause {
     pub title: String,
     pub name: String,
     pub r#type: String,
-    pub language: String,
+    pub language: sqlx::types::JsonValue,
     pub is_default: bool,
 }
 
@@ -29,7 +29,7 @@ pub struct Clause {
     pub title: String,
     pub name: String,
     pub r#type: String,
-    pub language: String,
+    pub language: sqlx::types::JsonValue,
     pub is_default: bool,
     pub last_modified_by: Uuid,
     pub last_modified_at: time::OffsetDateTime,
@@ -42,7 +42,7 @@ pub struct OrganizationClause {
     pub title: String,
     pub name: String,
     pub r#type: String,
-    pub language: String,
+    pub language: sqlx::types::JsonValue,
     pub is_default: bool,
     pub last_modified_by: Option<String>,
     pub last_modified_at: time::OffsetDateTime,
@@ -54,7 +54,7 @@ pub struct EditClausePayload {
     pub title: String,
     pub name: String,
     pub r#type: String,
-    pub language: String,
+    pub language: sqlx::types::JsonValue,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -63,7 +63,7 @@ pub struct EditClause {
     pub title: String,
     pub name: String,
     pub r#type: String,
-    pub language: String,
+    pub language: sqlx::types::JsonValue,
     pub is_default: bool
 }
 

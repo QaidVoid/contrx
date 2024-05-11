@@ -2,7 +2,7 @@ import { Button, LoadingOverlay, Modal, Select, Stack, TextInput, Textarea } fro
 import { DateInput } from "@mantine/dates";
 import { useForm, zodResolver } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { NewContractForm, NewContractPayload } from "../types/contract";
+import { NewContractForm } from "../types/contract";
 import useAuth from "../hooks/use-auth";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useState } from "react";

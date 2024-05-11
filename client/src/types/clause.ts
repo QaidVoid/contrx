@@ -6,7 +6,7 @@ export const NewClausePayload = z.object({
   title: z.string().trim(),
   name: z.string().trim(),
   type: z.string().trim(),
-  language: z.string().trim(),
+  language: z.any(),
   is_default: z.boolean().default(false)
 });
 

@@ -35,7 +35,8 @@ pub struct Contract {
     pub effective_date: OffsetDateTime,
     pub renewable: bool,
     pub end_date: Option<OffsetDateTime>,
-    pub status: String
+    pub status: String,
+    pub document: sqlx::types::JsonValue
 }
 
 #[derive(Deserialize, Serialize, Debug)]

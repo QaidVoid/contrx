@@ -2,7 +2,7 @@ import { Stack, Text } from "@mantine/core";
 import CreateContractForm from "../components/create-contract-form";
 import TitleBar from "../components/title-bar";
 import useAuth from "../hooks/use-auth";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -31,12 +31,12 @@ function Contracts() {
 
     const { body, status } = await api.getContracts({
       params: {
-        organizationId
+        organizationId,
       },
       query: {
         page: Number(searchParams.get("page") ?? 1),
         size: Number(searchParams.get("size") ?? 10),
-      }
+      },
     });
 
     if (status === 200) {
@@ -71,17 +71,19 @@ function Contracts() {
             {
               accessor: "title",
               title: "Title",
-              render: (record) => record.title
+              render: (record) => (
+                <Link to={`/${organizationId}/contract/${record.id}`}>{record.title}</Link>
+              ),
             },
             {
               accessor: "status",
               title: "Status",
-              render: (record) => record.status
+              render: (record) => record.status,
             },
             {
               accessor: "CounterParty",
               title: "CounterParty",
-              render: (record) => record.counterparty_name
+              render: (record) => record.counterparty_name,
             },
             {
               accessor: "effective_date",
@@ -92,7 +94,7 @@ function Contracts() {
               accessor: "end_date",
               title: "End Date",
               render: (record) => dayjs(parseDate(record.end_date)).format("MMM DD, YYYY"),
-            }
+            },
           ]}
         />
       </Stack>

@@ -1,4 +1,4 @@
-import { useEditor } from "@tiptap/react";
+import { type JSONContent, useEditor } from "@tiptap/react";
 import { RichTextEditor, Link } from "@mantine/tiptap";
 import Highlight from "@tiptap/extension-highlight";
 import StarterKit from "@tiptap/starter-kit";
@@ -11,7 +11,7 @@ import { Input, ScrollArea } from "@mantine/core";
 type Props = {
   value: string;
   error: string | undefined;
-  onChange: (value: string) => void;
+  onChange: (value: JSONContent) => void;
 };
 
 function TextEditor({ value, error, onChange }: Props) {
@@ -27,7 +27,7 @@ function TextEditor({ value, error, onChange }: Props) {
     ],
     content: value,
     onUpdate({ editor }) {
-      onChange(editor.getHTML());
+      onChange(editor.getJSON());
     },
   });
 
