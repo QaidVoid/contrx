@@ -1,6 +1,6 @@
 import { AppShell, Button, Group, ScrollArea, Stack, Text } from "@mantine/core";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
-import { IconFileAnalytics, IconNotification, IconTemplate, IconFlower, IconFileArrowLeft, IconListTree, IconUsers, IconSettings } from "@tabler/icons-react";
+import { IconFileAnalytics, IconNotification, IconTemplate, IconFlower, IconFileArrowLeft, IconListTree, IconUsers, IconSettings, IconUserBolt } from "@tabler/icons-react";
 import useAuth from "../../hooks/use-auth";
 import { LinkGroup } from "../../components/link-group";
 import { useCallback, useEffect, useState } from "react";
@@ -73,7 +73,7 @@ function OrganizationDashboard() {
       <AppShell.Navbar p="md">
         <ScrollArea>
           <Stack p={4} gap={20}>
-            {/*<LinkGroup
+            <LinkGroup
               name="Dashboard"
               links={[
                 {
@@ -83,7 +83,7 @@ function OrganizationDashboard() {
                 },
                 {
                   label: "Contracts",
-                  href: "/contracts",
+                  href: `/${organizationId}/contracts`,
                   icon: IconFileAnalytics,
                 },
                 {
@@ -92,19 +92,19 @@ function OrganizationDashboard() {
                   icon: IconNotification
                 }
               ]}
-            />*/}
+            />
             <LinkGroup
               name="Organization"
               links={[
                 {
-                  label: "Info",
-                  href: `/${organizationId}/info`,
-                  icon: IconSettings
-                },
-                {
                   label: "Users",
                   href: `/${organizationId}/users`,
                   icon: IconUsers,
+                },
+                {
+                  label: "CounterParties",
+                  href: `/${organizationId}/counterparties`,
+                  icon: IconSettings
                 },
                 {
                   label: "Clauses",
@@ -113,7 +113,7 @@ function OrganizationDashboard() {
                 },
                 {
                   label: "Contract Types",
-                  href: `/${organizationId}/contract`,
+                  href: `/${organizationId}/contract-types`,
                   icon: IconFileAnalytics
                 },
                 {

@@ -52,7 +52,7 @@ function OrganizationContract() {
       <TitleBar>
         <Text c="white">Contract Types</Text>
 
-        <Button bg="blue.6" onClick={() => navigate(`/${organizationId}/contract/new`)}>
+        <Button bg="blue.6" onClick={() => navigate(`/${organizationId}/contract-types/new`)}>
           Create Contract
         </Button>
       </TitleBar>
@@ -68,7 +68,7 @@ function OrganizationContract() {
               accessor: "name",
               title: "Contract Name",
               render: (record) => {
-                  return <Link to={`/${organizationId}/contract/${record.id}`}>{record.name}</Link>
+                  return <Link to={`/${organizationId}/contract-types/${record.id}`}>{record.name}</Link>
               }
             },
             {

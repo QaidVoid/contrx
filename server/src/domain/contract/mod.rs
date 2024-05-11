@@ -2,21 +2,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::Error;
 
-pub mod party;
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Party {
-    pub party_type: String,
-    pub party_repr_id: String
-}
-
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CreateContractPayload {
     pub contract_type: String,
+    pub title: String,
     pub description: String,
     pub effective_date: String,
-    pub parties_involved: Vec<String>,
-    pub expiry_date: String
+    pub expiry_date: String,
+    pub counterparty: String
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -29,9 +22,10 @@ pub enum ContractStatus {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Contract {
     pub contract_type: String,
+    pub title: String,
     pub description: String,
     pub effective_date: String,
-    pub parties_involved: Vec<Party>,
+    pub counterparty: String,
     pub expiry_date: String,
     pub status: ContractStatus,
     pub blockchain_hash: String,
@@ -40,10 +34,11 @@ pub struct Contract {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CreateContract {
     pub contract_type: String,
+    pub title: String,
     pub description: String,
     pub effective_date: String,
-    pub parties_involved: Vec<String>,
-    pub expiry_date: String
+    pub expiry_date: String,
+    pub counterparty: String
 }
 
 
@@ -56,10 +51,11 @@ impl TryFrom<CreateContractPayload> for CreateContract {
         if builder.is_empty() {
             Ok(CreateContract {
                 contract_type: payload.contract_type,
+                title: payload.title,
                 description: payload.description,
                 effective_date: payload.effective_date,
-                parties_involved: payload.parties_involved,
                 expiry_date: payload.expiry_date,
+                counterparty: payload.counterparty
             })
         } else {
             Err(builder.build())

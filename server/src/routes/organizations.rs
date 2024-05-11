@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     middleware,
     routing::{get, post, put},
     Extension, Json, Router,
@@ -7,9 +7,12 @@ use axum::{
 use uuid::Uuid;
 
 use crate::{
-    domain::organization::{
-        CreateOrganization, CreateOrganizationPayload, EditOrganization, EditOrganizationPayload,
-        Organization,
+    domain::{
+        organization::{
+            CounterParty, CreateCounterPartyPayload, CreateOrganization, CreateOrganizationPayload,
+            EditOrganization, EditOrganizationPayload, Organization,
+        },
+        pagination::{PageCount, PaginatedResponse, Pagination},
     },
     error::Error,
     middleware::auth::auth_middleware,
@@ -24,6 +27,8 @@ pub fn organizations_router(state: &AppState) -> Router<AppState> {
         .route("/", put(update_organization))
         .route("/:organization_id", get(get_organization))
         .route("/", get(get_organizations))
+        .route("/:organization_id/counterparty", post(create_counterparty))
+        .route("/:organization_id/counterparties", get(get_counterparties))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -137,4 +142,71 @@ async fn get_organizations(
     .await?;
 
     Ok(Json(organizations))
+}
+
+#[axum::debug_handler]
+async fn create_counterparty(
+    Path(organization_id): Path<Uuid>,
+    State(state): State<AppState>,
+    Json(payload): Json<CreateCounterPartyPayload>,
+) -> Result<CounterParty> {
+    let counterparty = sqlx::query_as!(
+        CounterParty,
+        r#"
+            INSERT INTO counterparties
+            (organization_id, name, type, full_name, email)
+            VALUES
+            ($1, $2, $3, $4, $5)
+            RETURNING *
+        "#,
+        organization_id,
+        payload.name,
+        payload.r#type,
+        payload.full_name,
+        payload.email
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    Ok(Json(counterparty))
+}
+
+#[axum::debug_handler]
+async fn get_counterparties(
+    pagination: Query<Pagination>,
+    Path(organization_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<PaginatedResponse<CounterParty>> {
+    let pages = sqlx::query_as!(
+        PageCount,
+        r#"
+            SELECT COUNT(*) as total_count
+            FROM counterparties
+            WHERE organization_id=$1
+        "#,
+        organization_id
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    let counterparty = sqlx::query_as!(
+        CounterParty,
+        r#"
+            SELECT *
+            FROM counterparties
+            WHERE organization_id=$1
+            LIMIT $2
+            OFFSET $3
+        "#,
+        organization_id,
+        pagination.size,
+        (pagination.page - 1) * pagination.size
+    )
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(PaginatedResponse {
+        data: counterparty,
+        total_count: pages.total_count,
+    }))
 }

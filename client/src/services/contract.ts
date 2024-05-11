@@ -2,7 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
 import { NewContractPayload, NewContractResponse } from "../types/contract";
-import { NewOrganizationResponse, OrganizationPayload, OrganizationsResponse } from "../types/organization";
+import { CounterParty, NewCounterPartyPayload, NewOrganizationResponse, OrganizationPayload, OrganizationsResponse, PaginatedCounterParties } from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
 import { ContractType, NewContractTypePayload, TemplateWithClause, TemplateWithClausePayload } from "../types/contract-type";
@@ -79,6 +79,23 @@ export const contract = c.router({
       200: OrganizationsResponse
     },
     summary: "Get organizations of authenticated users"
+  },
+  getCounterParties: {
+    method: "GET",
+    path: "/api/organizations/:organizationId/counterparties",
+    query: PaginationQuery,
+    responses: {
+      200: PaginatedCounterParties
+    }
+  },
+  createCounterParty: {
+    method: "POST",
+    path: "/api/organizations/:organizationId/counterparty",
+    responses: {
+      200: CounterParty,
+    },
+    body: NewCounterPartyPayload,
+    summary: "Create counterparty"
   },
   createClause: {
     method: "POST",

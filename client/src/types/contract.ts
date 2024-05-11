@@ -6,11 +6,7 @@ export const NewContractPayload = z.object({
   description: z.string().trim(),
   effective_date: z.date(),
   expiry_date: z.date(),
-  parties_involved: z.array(
-    z.object({
-      id: z.number(),
-    }),
-  ),
+  counterparty: z.string()
 });
 
 export type NewContractPayload = z.infer<typeof NewContractPayload>;

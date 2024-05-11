@@ -17,6 +17,7 @@ import OrganizationDashboard from "./pages/organization/organization-dashboard";
 import OrganizationClause from "./pages/organization/clause/detail";
 import CreateContractType from "./pages/organization/contract/create";
 import EditContractType from "./pages/organization/contract/edit";
+import CounterParties from "./pages/organization/counterparties";
 
 export const router = createBrowserRouter([
   {
@@ -61,10 +62,10 @@ export const router = createBrowserRouter([
               //   path: "/overview",
               //   element: <Dashboard />,
               // },
-              // {
-              //   path: "/contracts",
-              //   element: <Contracts />,
-              // },
+              {
+                path: "/:organizationId/contracts",
+                element: <Contracts />,
+              },
               {
                 path: "/:organizationId/:contractId",
                 element: <Contracts />,
@@ -72,6 +73,10 @@ export const router = createBrowserRouter([
               {
                 path: "/:organizationId/users",
                 element: <OrganizationUsers />
+              },
+              {
+                path: "/:organizationId/counterparties",
+                element: <CounterParties />
               },
               {
                 path: "/:organizationId/clauses",
@@ -82,15 +87,15 @@ export const router = createBrowserRouter([
                 element: <OrganizationClause />
               },
               {
-                path: "/:organizationId/contract",
+                path: "/:organizationId/contract-types",
                 element: <OrganizationContract />
               },
               {
-                path: "/:organizationId/contract/new",
+                path: "/:organizationId/contract-types/new",
                 element: <CreateContractType />
               },
               {
-                path: "/:organizationId/contract/:templateId",
+                path: "/:organizationId/contract-types/:templateId",
                 element: <EditContractType />
               },
               {

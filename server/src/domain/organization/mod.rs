@@ -36,6 +36,25 @@ pub struct EditOrganization {
     pub country: String,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct CreateCounterPartyPayload {
+    pub name: String,
+    pub r#type: String,
+    pub full_name: String,
+    pub email: String
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct CounterParty {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub name: String,
+    pub r#type: String,
+    pub full_name: String,
+    pub email: String,
+    pub website: Option<String>
+}
+
 impl TryFrom<CreateOrganizationPayload> for CreateOrganization {
     type Error = Error;
 
