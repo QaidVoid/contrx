@@ -50,6 +50,15 @@ pub struct CreateContract {
     pub counterparty_id: Uuid
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct ContractTitlePayload {
+    pub title: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct ContractDocPayload {
+    pub document: sqlx::types::JsonValue,
+}
 
 impl TryFrom<CreateContractPayload> for CreateContract {
     type Error = Error;

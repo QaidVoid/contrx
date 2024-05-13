@@ -11,6 +11,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
 import Highlight from "@tiptap/extension-highlight";
+import Italic from "@tiptap/extension-italic";
 
 type Props = {
   content: JSONContent
@@ -29,7 +30,8 @@ export default function RenderHTML({ content }: Props) {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Superscript,
       SubScript,
-      Highlight
+      Highlight,
+      Italic
     ])
   }, [content])
 

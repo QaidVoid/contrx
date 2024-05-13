@@ -1,11 +1,13 @@
 use axum::extract::{Path, State};
-use axum::routing::get;
+use axum::routing::{get, patch};
 use axum::{routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::domain::contract::{Contract, CreateContract, CreateContractPayload};
+use crate::domain::contract::{
+    Contract, ContractDocPayload, ContractTitlePayload, CreateContract, CreateContractPayload,
+};
 use crate::domain::pagination::{PageCount, PaginatedResponse};
 use crate::{error::Error, AppState};
 
@@ -16,6 +18,9 @@ pub fn contracts_router() -> Router<AppState> {
         .route("/", post(create_contract))
         .route("/:organization_id", get(get_contracts))
         .route("/single/:contract_id", get(get_contract))
+        .route("/doc/:contract_id", patch(update_doc))
+        .route("/title/:contract_id", patch(update_title))
+        .route("/publish/:contract_id", patch(publish))
 }
 
 #[axum::debug_handler]
@@ -27,12 +32,18 @@ async fn create_contract(
 
     #[derive(Deserialize, Serialize)]
     struct ContractID {
-        id: Uuid
+        id: Uuid,
     }
 
     #[derive(Deserialize, Serialize)]
     struct Languages {
-        language: sqlx::types::JsonValue
+        content: sqlx::types::JsonValue,
+    }
+
+    #[derive(Deserialize, Serialize)]
+    struct Document {
+        r#type: String,
+        content: Vec<serde_json::Value>,
     }
 
     let mut tx = state.pool.begin().await?;
@@ -65,7 +76,7 @@ async fn create_contract(
         Languages,
         r#"
         SELECT
-            c.language
+            c.language as content
         FROM clauses c
         JOIN contract_clauses cc ON c.id = cc.clause_id
         JOIN contract_types ct ON cc.contract_type_id = ct.id
@@ -75,7 +86,24 @@ async fn create_contract(
         contract.contract_type_id
     )
     .fetch_all(&mut *tx)
-    .await?;
+    .await?
+    .into_iter()
+    .flat_map(|langs| {
+        let parsed_content: serde_json::Value = json!(&langs.content);
+        parsed_content["content"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|item| {
+                let mut obj = serde_json::Map::new();
+                for (key, value) in item.as_object().unwrap().iter() {
+                    obj.insert(key.to_string(), value.clone());
+                }
+                serde_json::Value::from(obj)
+            })
+            .collect::<Vec<serde_json::Value>>()
+    })
+    .collect();
 
     sqlx::query!(
         r#"
@@ -85,7 +113,10 @@ async fn create_contract(
             WHERE id=$1
         "#,
         id.id,
-        json!(template)
+        json!(Document {
+            r#type: "doc".to_string(),
+            content: template
+        })
     )
     .execute(&mut *tx)
     .await?;
@@ -152,4 +183,65 @@ async fn get_contract(
     .await?;
 
     Ok(Json(contracts))
+}
+
+#[axum::debug_handler]
+async fn update_doc(
+    Path(contract_id): Path<Uuid>,
+    State(state): State<AppState>,
+    Json(payload): Json<ContractDocPayload>,
+) -> Result<()> {
+    sqlx::query!(
+        r#"
+            UPDATE contracts
+            SET
+            document=$2
+            WHERE id=$1
+        "#,
+        contract_id,
+        payload.document
+    )
+    .execute(&state.pool)
+    .await?;
+
+    Ok(Json(()))
+}
+
+#[axum::debug_handler]
+async fn update_title(
+    Path(contract_id): Path<Uuid>,
+    State(state): State<AppState>,
+    Json(payload): Json<ContractTitlePayload>,
+) -> Result<()> {
+    sqlx::query!(
+        r#"
+            UPDATE contracts
+            SET
+            title=$2
+            WHERE id=$1
+        "#,
+        contract_id,
+        payload.title
+    )
+    .execute(&state.pool)
+    .await?;
+
+    Ok(Json(()))
+}
+
+#[axum::debug_handler]
+async fn publish(Path(contract_id): Path<Uuid>, State(state): State<AppState>) -> Result<()> {
+    sqlx::query!(
+        r#"
+            UPDATE contracts
+            SET
+            status='Published'
+            WHERE id=$1
+        "#,
+        contract_id
+    )
+    .execute(&state.pool)
+    .await?;
+
+    Ok(Json(()))
 }

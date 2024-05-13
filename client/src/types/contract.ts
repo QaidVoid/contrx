@@ -50,3 +50,15 @@ export type Contract = z.infer<typeof Contract>;
 export const PaginatedContracts = createPaginationSchema(Contract);
 
 export type PaginatedContracts = z.infer<typeof PaginatedContracts>;
+
+export const ContractTitlePayload = z.object({
+  title: z.string()
+});
+
+export type ContractTitlePayload = z.infer<typeof ContractTitlePayload>;
+
+export const ContractDocPayload = z.object({
+  document: z.any()
+})
+
+export type ContractDocPayload = z.infer<typeof ContractDocPayload>;

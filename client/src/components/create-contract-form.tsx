@@ -31,6 +31,7 @@ function CreateContractForm() {
 
   const handleSubmit = async (data: NewContractForm) => {
     create();
+
     const { body, status } = await api.createContract({
       body: {
         ...data,

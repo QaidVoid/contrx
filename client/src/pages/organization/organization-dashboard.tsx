@@ -115,21 +115,6 @@ function OrganizationDashboard() {
                   label: "Contract Types",
                   href: `/${organizationId}/contract-types`,
                   icon: IconFileAnalytics
-                },
-                {
-                  label: "Contract Letters",
-                  href: `/${organizationId}/templates`,
-                  icon: IconTemplate
-                },
-                {
-                  label: "Approval Workflows",
-                  href: `/${organizationId}/approval-workflows`,
-                  icon: IconFileArrowLeft
-                },
-                {
-                  label: "Choice List",
-                  href: `/${organizationId}/choice-list`,
-                  icon: IconListTree
                 }
               ]}
             />

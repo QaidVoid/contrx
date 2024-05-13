@@ -9,7 +9,7 @@ import SubScript from "@tiptap/extension-subscript";
 import { Input, ScrollArea } from "@mantine/core";
 
 type Props = {
-  value: string;
+  value: string | JSONContent;
   error: string | undefined;
   onChange: (value: JSONContent) => void;
 };

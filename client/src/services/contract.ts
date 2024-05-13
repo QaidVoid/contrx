@@ -1,7 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
-import { Contract, NewContractPayload, NewContractResponse } from "../types/contract";
+import { Contract, ContractDocPayload, ContractTitlePayload, NewContractPayload, NewContractResponse } from "../types/contract";
 import { CounterParty, NewCounterPartyPayload, NewOrganizationResponse, OrganizationPayload, OrganizationsResponse, PaginatedCounterParties } from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
@@ -192,4 +192,31 @@ export const contract = c.router({
     },
     summary: "Get contract"
   },
+  updateContractTitle: {
+    method: "PATCH",
+    path: "/api/contracts/title/:contractId",
+    responses: {
+      200: null
+    },
+    body: ContractTitlePayload,
+    summary: "Update contract title"
+  },
+  updateContractDoc: {
+    method: "PATCH",
+    path: "/api/contracts/doc/:contractId",
+    responses: {
+      200: null
+    },
+    body: ContractDocPayload,
+    summary: "Update document title"
+  },
+  publishContract: {
+    method: "PATCH",
+    path: "/api/contracts/publish/:contractId",
+    responses: {
+      200: null
+    },
+    body: null,
+    summary: "Publish contract"
+  }
 });

@@ -102,14 +102,6 @@ export const router = createBrowserRouter([
               {
                 path: "/:organizationId/templates",
                 element: <OrganizationTemplates />
-              },
-              {
-                path: "/:organizationId/approval-workflows",
-                element: <ApprovalWorkflows />
-              },
-              {
-                path: "/:organizationId/choice-list",
-                element: <ChoiceList />
               }
             ]
           },

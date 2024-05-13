@@ -24,6 +24,7 @@
     "@tiptap/extension-bold": "^2.3.2",
     "@tiptap/extension-document": "^2.3.2",
     "@tiptap/extension-highlight": "^2.3.2",
+    "@tiptap/extension-italic": "^2.3.2",
     "@tiptap/extension-link": "^2.3.2",
     "@tiptap/extension-paragraph": "^2.3.2",
     "@tiptap/extension-subscript": "^2.3.2",
