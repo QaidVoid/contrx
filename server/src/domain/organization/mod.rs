@@ -40,8 +40,6 @@ pub struct EditOrganization {
 pub struct CreateCounterPartyPayload {
     pub name: String,
     pub r#type: String,
-    pub full_name: String,
-    pub email: String
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -49,10 +47,21 @@ pub struct CounterParty {
     pub id: Uuid,
     pub organization_id: Uuid,
     pub name: String,
-    pub r#type: String,
+    pub r#type: String
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct CreateContactPayload {
     pub full_name: String,
-    pub email: String,
-    pub website: Option<String>
+    pub email: String
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Contact {
+    pub id: Uuid,
+    pub counterparty_id: Uuid,
+    pub full_name: String,
+    pub email: String
 }
 
 impl TryFrom<CreateOrganizationPayload> for CreateOrganization {

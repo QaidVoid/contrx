@@ -2,7 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
 import { Contract, ContractDocPayload, ContractTitlePayload, NewContractPayload, NewContractResponse } from "../types/contract";
-import { CounterParty, NewCounterPartyPayload, NewOrganizationResponse, OrganizationPayload, OrganizationsResponse, PaginatedCounterParties } from "../types/organization";
+import { ContactsList, ContactsListPayload, CounterParty, NewCounterPartyPayload, NewOrganizationResponse, OrganizationPayload, OrganizationsResponse, PaginatedCounterParties } from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
 import { NewUserErrorResponse, NewUserPayload, NewUserResponse } from "../types/user";
 import { ContractType, NewContractTypePayload, TemplateWithClause, TemplateWithClausePayload } from "../types/contract-type";
@@ -96,6 +96,32 @@ export const contract = c.router({
     },
     body: NewCounterPartyPayload,
     summary: "Create counterparty"
+  },
+  updateCounterParty: {
+    method: "PUT",
+    path: "/api/organizations/counterparty",
+    responses: {
+      200: CounterParty
+    },
+    body: CounterParty,
+    summary: "Update counterparty"
+  },
+  createContact: {
+    method: "POST",
+    path: "/api/organizations/counterparty/:counterpartyId/contact",
+    responses: {
+      200: ContactsList
+    },
+    body: ContactsListPayload,
+    summary: "Create contact"
+  },
+  getContacts: {
+    method: "GET",
+    path: "/api/organizations/counterparty/:counterpartyId/contacts",
+    responses: {
+      200: ContactsList
+    },
+    summary: "Get contacts"
   },
   createClause: {
     method: "POST",

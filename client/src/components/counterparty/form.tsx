@@ -37,22 +37,6 @@ function CounterPartyForm({ opened, creating, handleSubmit, label, close }: Prop
             {...form.getInputProps("type")}
           />
 
-          <TextInput
-            label="Full Name"
-            placeholder="Full Name"
-            size="md"
-            key={form.key("full_name")}
-            {...form.getInputProps("full_name")}
-          />
-
-          <TextInput
-            label="Email"
-            placeholder="Email"
-            size="md"
-            key={form.key("email")}
-            {...form.getInputProps("email")}
-          />
-
           <Button type="submit" fullWidth size="md" disabled={creating}>
             <LoadingOverlay
               visible={creating}

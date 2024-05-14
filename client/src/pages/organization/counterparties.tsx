@@ -9,6 +9,7 @@ import TitleBar from "../../components/title-bar";
 import useAuth from "../../hooks/use-auth";
 import type { CounterParty, PaginatedCounterParties } from "../../types/organization";
 import CreateCounterPartyForm from "../../components/create-counterparty-form";
+import EditCounterParty from "../../components/counterparty/edit";
 
 function CounterParties() {
   const { api } = useAuth();
@@ -58,6 +59,12 @@ function CounterParties() {
         <Text c="white">Counterparties</Text>
         <CreateCounterPartyForm organizationId={organizationId} onCreate={fetchCounterParties} />
       </TitleBar>
+
+      <EditCounterParty
+        counterparty={counterParty}
+        opened={!!counterParty}
+        close={() => setCounterParty(undefined)}
+      />
 
       <Stack p="md">
         <Table

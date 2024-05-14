@@ -9,8 +9,9 @@ use uuid::Uuid;
 use crate::{
     domain::{
         organization::{
-            CounterParty, CreateCounterPartyPayload, CreateOrganization, CreateOrganizationPayload,
-            EditOrganization, EditOrganizationPayload, Organization,
+            Contact, CounterParty, CreateContactPayload, CreateCounterPartyPayload,
+            CreateOrganization, CreateOrganizationPayload, EditOrganization,
+            EditOrganizationPayload, Organization,
         },
         pagination::{PageCount, PaginatedResponse, Pagination},
     },
@@ -28,7 +29,13 @@ pub fn organizations_router(state: &AppState) -> Router<AppState> {
         .route("/:organization_id", get(get_organization))
         .route("/", get(get_organizations))
         .route("/:organization_id/counterparty", post(create_counterparty))
+        .route("/counterparty", put(update_counterparty))
         .route("/:organization_id/counterparties", get(get_counterparties))
+        .route(
+            "/counterparty/:counterparty_id/contact",
+            post(create_contact),
+        )
+        .route("/counterparty/:counterparty_id/contacts", get(get_contacts))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -154,16 +161,38 @@ async fn create_counterparty(
         CounterParty,
         r#"
             INSERT INTO counterparties
-            (organization_id, name, type, full_name, email)
+            (organization_id, name, type)
             VALUES
-            ($1, $2, $3, $4, $5)
+            ($1, $2, $3)
             RETURNING *
         "#,
         organization_id,
         payload.name,
         payload.r#type,
-        payload.full_name,
-        payload.email
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    Ok(Json(counterparty))
+}
+
+#[axum::debug_handler]
+async fn update_counterparty(
+    State(state): State<AppState>,
+    Json(payload): Json<CounterParty>,
+) -> Result<CounterParty> {
+    let counterparty = sqlx::query_as!(
+        CounterParty,
+        r#"
+            UPDATE counterparties
+            SET
+            name=$2, type=$3
+            WHERE id=$1
+            RETURNING *
+        "#,
+        payload.id,
+        payload.name,
+        payload.r#type,
     )
     .fetch_one(&state.pool)
     .await?;
@@ -209,4 +238,88 @@ async fn get_counterparties(
         data: counterparty,
         total_count: pages.total_count,
     }))
+}
+
+#[axum::debug_handler]
+async fn create_contact(
+    Path(counterparty_id): Path<Uuid>,
+    State(state): State<AppState>,
+    Json(payload): Json<Vec<CreateContactPayload>>,
+) -> Result<Vec<Contact>> {
+    let mut contacts: Vec<Contact> = Vec::new();
+
+    // FIXME: remove this and do proper updating
+    sqlx::query!(
+        "DELETE FROM contacts WHERE counterparty_id=$1",
+        counterparty_id
+    )
+    .execute(&state.pool)
+    .await?;
+
+    for contact in payload {
+        let exists = sqlx::query!(
+            "SELECT id FROM contacts WHERE counterparty_id=$1 AND email=$2",
+            counterparty_id,
+            contact.email
+        )
+        .fetch_optional(&state.pool)
+        .await?;
+
+        if exists.is_some() {
+            let contact = sqlx::query_as!(
+                Contact,
+                r#"
+                UPDATE contacts
+                SET
+                full_name=$3
+                WHERE counterparty_id=$1 AND email=$2
+                RETURNING *
+            "#,
+                counterparty_id,
+                contact.email,
+                contact.full_name
+            )
+            .fetch_one(&state.pool)
+            .await?;
+
+            contacts.push(contact);
+        } else {
+            let contact = sqlx::query_as!(
+                Contact,
+                r#"
+                INSERT INTO contacts (counterparty_id, email, full_name)
+                VALUES
+                ($1, $2, $3)
+                RETURNING *
+            "#,
+                counterparty_id,
+                contact.email,
+                contact.full_name
+            )
+            .fetch_one(&state.pool)
+            .await?;
+
+            contacts.push(contact);
+        }
+    }
+
+    Ok(Json(contacts))
+}
+
+#[axum::debug_handler]
+async fn get_contacts(
+    Path(counterparty_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<Vec<Contact>> {
+    let contacts = sqlx::query_as!(
+        Contact,
+        r#"
+            SELECT * FROM contacts WHERE counterparty_id=$1
+        "#,
+        counterparty_id
+    )
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(contacts))
 }
