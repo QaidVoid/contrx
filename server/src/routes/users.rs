@@ -2,10 +2,18 @@ use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
 };
-use axum::{extract::State, routing::post, Json, Router};
+use axum::{
+    extract::{Path, Query, State},
+    routing::{get, post},
+    Json, Router,
+};
+use uuid::Uuid;
 
 use crate::{
-    domain::user::{CreateUser, CreateUserPayload},
+    domain::{
+        pagination::{PaginatedResponse, Pagination},
+        user::{CreateUser, CreateUserPayload, OrgUser},
+    },
     error::Error,
     AppState,
 };
@@ -13,7 +21,9 @@ use crate::{
 type Result<T> = std::result::Result<Json<T>, Error>;
 
 pub fn users_router() -> Router<AppState> {
-    Router::new().route("/", post(create_user))
+    Router::new()
+        .route("/", post(create_user))
+        .route("/org/:organization_id", get(get_users))
 }
 
 #[axum::debug_handler]
@@ -51,3 +61,44 @@ async fn create_user(
 // async fn invite_org_user() -> Result<CreateOrgUser> {
 //
 // }
+
+#[axum::debug_handler]
+async fn get_users(
+    pagination: Query<Pagination>,
+    Path(organization_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<PaginatedResponse<OrgUser>> {
+    let records = sqlx::query!(
+        r#"
+        SELECT COUNT(*) as total_count
+        FROM
+        users_organizations
+        WHERE organization_id=$1
+    "#,
+        organization_id
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    let users = sqlx::query_as!(
+        OrgUser,
+        r#"
+            SELECT u.id, u.email, u.first_name, u.last_name, uo.status, uo.role FROM users_organizations uo
+            JOIN users u
+            ON u.id = uo.user_id
+            WHERE uo.organization_id=$1
+            LIMIT $2
+            OFFSET $3
+        "#,
+        organization_id,
+        pagination.size,
+        (pagination.page - 1) * pagination.size
+    )
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(PaginatedResponse {
+        data: users,
+        total_count: records.total_count,
+    }))
+}

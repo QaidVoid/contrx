@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::error::Error;
 
@@ -36,6 +37,25 @@ pub struct CreateUser {
 
     pub first_name: Name,
     pub last_name: Name,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct OrganizationUser {
+    pub id: String,
+    pub user_id: Uuid,
+    pub organization_id: Uuid,
+    pub role: String,
+    pub status: String
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct OrgUser {
+    pub id: String,
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub status: String,
+    pub role: String
 }
 
 impl TryFrom<CreateUserPayload> for CreateUser {

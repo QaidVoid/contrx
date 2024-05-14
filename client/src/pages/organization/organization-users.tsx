@@ -1,33 +1,36 @@
-import { Card, Flex, Grid, Group, Paper, Stack, Text } from "@mantine/core";
+import { Tabs, Text } from "@mantine/core";
 import TitleBar from "../../components/title-bar";
+import { useParams } from "react-router-dom";
+import OrganizationUsersList from "../../components/organization-users-list";
 
 function OrganizationUsers() {
+  const params = useParams();
+
+  if (!params.organizationId) return;
+
+  const { organizationId } = params;
+
   return (
     <>
       <TitleBar>
         <Text c="white">Users</Text>
       </TitleBar>
-      <Group p="md" grow>
-        <Grid columns={3}>
-          <Card withBorder p="xl" radius="md">
-            <Grid>
-              <Grid.Col span={4}>
-                Profile Image
-              </Grid.Col>
 
-              <Grid.Col span={8}>
-                <Stack gap={2}>
-                  <Text>Name</Text>
-                  <Text>Email</Text>
-                  <Text>Active</Text>
-                </Stack>
-              </Grid.Col>
-            </Grid>
-          </Card>
-        </Grid>
-      </Group>
+      <Tabs defaultValue="active">
+        <Tabs.List>
+          <Tabs.Tab value="active">Active</Tabs.Tab>
+          <Tabs.Tab value="invited">Invited</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="active">
+          <OrganizationUsersList organizationId={organizationId} status="active" />
+        </Tabs.Panel>
+        <Tabs.Panel value="invited">
+          <OrganizationUsersList organizationId={organizationId} status="invited" />
+        </Tabs.Panel>
+      </Tabs>
     </>
-  )
+  );
 }
 
 export default OrganizationUsers;

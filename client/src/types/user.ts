@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createPaginationSchema } from "./pagination";
 
 export const User = z.object({
   id: z.string(),
@@ -44,3 +45,18 @@ export const NewUserErrorResponse = z.object({
 });
 
 export type NewUserErrorResponse = z.infer<typeof NewUserErrorResponse>;
+
+export const OrganizationUser = z.object({
+  id: z.string(),
+  email: z.string(),
+  first_name: z.string(),
+  last_name: z.string(),
+  status: z.string(),
+  role: z.string(),
+});
+
+export type OrganizationUser = z.infer<typeof OrganizationUser>;
+
+export const PaginatedOrganizationUsers = createPaginationSchema(OrganizationUser);
+
+export type PaginatedOrganizationUsers = z.infer<typeof PaginatedOrganizationUsers>;
