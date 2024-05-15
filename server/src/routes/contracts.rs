@@ -195,7 +195,7 @@ async fn update_doc(
         r#"
             UPDATE contracts
             SET
-            document=$2
+            document=$2, status='Draft'
             WHERE id=$1
         "#,
         contract_id,
@@ -217,7 +217,7 @@ async fn update_title(
         r#"
             UPDATE contracts
             SET
-            title=$2
+            title=$2, status='Draft'
             WHERE id=$1
         "#,
         contract_id,

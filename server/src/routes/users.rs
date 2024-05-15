@@ -12,7 +12,7 @@ use uuid::Uuid;
 use crate::{
     domain::{
         pagination::{PaginatedResponse, Pagination},
-        user::{CreateUser, CreateUserPayload, OrgUser},
+        user::{CreateUser, CreateUserPayload, NewUser, OrgUser},
     },
     error::Error,
     AppState,
@@ -24,6 +24,7 @@ pub fn users_router() -> Router<AppState> {
     Router::new()
         .route("/", post(create_user))
         .route("/org/:organization_id", get(get_users))
+        .route("/org/:organization_id", post(invite_user))
 }
 
 #[axum::debug_handler]
@@ -101,4 +102,54 @@ async fn get_users(
         data: users,
         total_count: records.total_count,
     }))
+}
+
+#[axum::debug_handler]
+async fn invite_user(
+    Path(organization_id): Path<Uuid>,
+    State(state): State<AppState>,
+    Json(payload): Json<NewUser>,
+) -> Result<NewUser> {
+    let user = sqlx::query!("SELECT id FROM users WHERE email=$1", payload.email)
+        .fetch_optional(&state.pool)
+        .await?;
+
+    if user.is_none() {
+        let mut builder = Error::builder();
+        let error = ("user_not_found", "User doesn't exist");
+        builder.error(error);
+        return Err(builder.build());
+    }
+
+    let user = user.unwrap();
+
+    let org_user = sqlx::query!(
+        "SELECT id FROM users_organizations WHERE user_id=$1 AND organization_id=$2",
+        user.id,
+        organization_id
+    )
+    .fetch_optional(&state.pool)
+    .await?;
+
+    if org_user.is_some() {
+        let mut builder = Error::builder();
+        builder.error(("already_invited", "User is already invited"));
+        return Err(builder.build());
+    }
+
+    sqlx::query!(
+        r#"
+            INSERT INTO users_organizations
+            (user_id, organization_id, role, status)
+            VALUES
+            ($1, $2, $3, 'Invited')
+        "#,
+        user.id,
+        organization_id,
+        payload.role
+    )
+    .execute(&state.pool)
+    .await?;
+
+    Ok(Json(payload))
 }

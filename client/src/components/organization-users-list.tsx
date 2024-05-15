@@ -4,8 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import useAuth from "../hooks/use-auth";
 import type { PaginatedOrganizationUsers } from "../types/user";
-import { Group, Avatar, Stack, Badge, Button, Text } from "@mantine/core";
-import { IconMailPlus, IconUserMinus } from "@tabler/icons-react";
+import { Group, Avatar, Stack, Badge, Text } from "@mantine/core";
 
 type Props = {
   organizationId: string;
@@ -13,7 +12,7 @@ type Props = {
 };
 
 function OrganizationUsersList({ organizationId, status }: Props) {
-  const { api, auth } = useAuth();
+  const { api } = useAuth();
   const [fetching, { open: fetch, close: completeFetch }] = useDisclosure(false);
   const [users, setUsers] = useState<PaginatedOrganizationUsers>({
     data: [],

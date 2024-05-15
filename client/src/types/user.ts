@@ -48,7 +48,7 @@ export type NewUserErrorResponse = z.infer<typeof NewUserErrorResponse>;
 
 export const OrganizationUser = z.object({
   id: z.string(),
-  email: z.string(),
+  email: z.string().email(),
   first_name: z.string(),
   last_name: z.string(),
   status: z.string(),
@@ -60,3 +60,21 @@ export type OrganizationUser = z.infer<typeof OrganizationUser>;
 export const PaginatedOrganizationUsers = createPaginationSchema(OrganizationUser);
 
 export type PaginatedOrganizationUsers = z.infer<typeof PaginatedOrganizationUsers>;
+
+export const InviteUser = z.object({
+  role: z.string(),
+  email: z.string().email(),
+});
+
+export type InviteUser = z.infer<typeof InviteUser>;
+
+export const InviteUserError = z.object({
+  errors: z.array(
+    z.object({
+      code: z.enum(["already_invited", "user_not_found"]),
+      message: z.string(),
+    }),
+  ),
+});
+
+export type InviteUserError = z.infer<typeof InviteUserError>;

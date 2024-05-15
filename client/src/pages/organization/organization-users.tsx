@@ -2,6 +2,7 @@ import { Tabs, Text } from "@mantine/core";
 import TitleBar from "../../components/title-bar";
 import { useParams } from "react-router-dom";
 import OrganizationUsersList from "../../components/organization-users-list";
+import InviteUserForm from "../../components/invite-user-form";
 
 function OrganizationUsers() {
   const params = useParams();
@@ -14,6 +15,8 @@ function OrganizationUsers() {
     <>
       <TitleBar>
         <Text c="white">Users</Text>
+
+        <InviteUserForm organizationId={organizationId} />
       </TitleBar>
 
       <Tabs defaultValue="active">

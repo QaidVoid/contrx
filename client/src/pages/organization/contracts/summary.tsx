@@ -14,6 +14,7 @@ function ContractSummary() {
   const params = useParams();
   const [contract, setContract] = useState<Contract>();
   const [doc, setDoc] = useState<JSONContent>({ type: "doc", content: [] });
+  const [edited, setEdited] = useState(false);
   const [preview, setPreview] = useState(false);
 
   if (!params.organizationId || !params.contractId) return;
@@ -26,7 +27,6 @@ function ContractSummary() {
         contractId,
       },
     });
-    console.log("BODY:", body);
 
     if (status === 200) {
       setContract(body);
@@ -60,6 +60,8 @@ function ContractSummary() {
     });
 
     if (uStatus === 200 && ucStatus === 200) {
+      setContract((prev) => ({ ...prev, status: "Draft" }));
+      setEdited(false);
       notifications.show({
         title: "Contract",
         message: "Contract updated",
@@ -75,6 +77,8 @@ function ContractSummary() {
     });
 
     if (status === 200) {
+      setContract((prev) => ({ ...prev, status: "Published" }));
+      setEdited(false);
       notifications.show({
         title: "Contract",
         message: "Contract published successfully",
@@ -98,13 +102,17 @@ function ContractSummary() {
             </Button>
           )}
 
-          <Button bg="blue.6" onClick={handleSave}>
-            Save
-          </Button>
+          {edited ? (
+            <Button bg="yellow.6" onClick={handleSave} c="gray.8">
+              Save Draft
+            </Button>
+          ) : undefined}
 
-          <Button bg="blue.6" onClick={handlePublish}>
-            Publish
-          </Button>
+          {contract.status === "Draft" ? (
+            <Button bg="blue.6" onClick={handlePublish}>
+              Publish
+            </Button>
+          ) : undefined}
         </Group>
       </TitleBar>
 
@@ -118,7 +126,14 @@ function ContractSummary() {
             {preview ? (
               <RenderHTML content={doc} />
             ) : (
-              <TextEditor value={doc} error={undefined} onChange={(value) => setDoc(value)} />
+              <TextEditor
+                value={doc}
+                error={undefined}
+                onChange={(value) => {
+                  setEdited(true);
+                  setDoc(value);
+                }}
+              />
             )}
           </Paper>
         </Stack>

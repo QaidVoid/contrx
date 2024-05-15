@@ -45,7 +45,7 @@ pub struct OrganizationUser {
     pub user_id: Uuid,
     pub organization_id: Uuid,
     pub role: String,
-    pub status: String
+    pub status: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -55,7 +55,13 @@ pub struct OrgUser {
     pub first_name: String,
     pub last_name: String,
     pub status: String,
-    pub role: String
+    pub role: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct NewUser {
+    pub email: String,
+    pub role: String,
 }
 
 impl TryFrom<CreateUserPayload> for CreateUser {

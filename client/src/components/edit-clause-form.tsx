@@ -3,7 +3,9 @@ import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import useAuth from "../hooks/use-auth";
 import { type ClauseResponse, NewClausePayload } from "../types/clause";
-import ClauseForm from "./clause/form";
+import { Modal, Group, Select, TextInput, Button, LoadingOverlay } from "@mantine/core";
+import TextEditor from "./super-rich-editor";
+import { useState } from "react";
 
 type Props = {
   onEdit: () => void;
@@ -18,12 +20,15 @@ function EditClause({ onEdit, clause, opened, close }: Props) {
     validate: zodResolver(NewClausePayload),
   });
   const [creating, { open: create, close: finish }] = useDisclosure(false);
+  const [mounted, setMounted] = useState(false);
   const { api } = useAuth();
 
   if (!clause) return;
 
-  if (!form.initialized) {
-    form.initialize(clause);
+  if (!mounted) {
+    form.setValues(clause);
+    form.resetDirty();
+    setMounted(true);
   }
 
   const handleSubmit = async (data: NewClausePayload) => {
@@ -54,13 +59,60 @@ function EditClause({ onEdit, clause, opened, close }: Props) {
   };
 
   return (
-    <ClauseForm
-      label="Edit Clause"
+    <Modal
       opened={opened}
-      close={close}
-      creating={creating}
-      handleSubmit={handleSubmit}
-    />
+      onClose={() => {
+        setMounted(false);
+        close();
+      }}
+      title="Edit Clause"
+      size="lg"
+    >
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Group grow>
+          <Select
+            label="Clause Type"
+            placeholder="Select clause type"
+            size="md"
+            data={["Amendment", "Assignment", "Benefits", "Compliance"]}
+            key={form.key("type")}
+            {...form.getInputProps("type")}
+          />
+
+          <TextInput
+            label="Clause Name"
+            placeholder="Clause name"
+            size="md"
+            key={form.key("name")}
+            {...form.getInputProps("name")}
+          />
+        </Group>
+
+        <TextInput
+          label="Clause Title"
+          placeholder="Clause title"
+          mt="md"
+          size="md"
+          key={form.key("title")}
+          {...form.getInputProps("title")}
+        />
+
+        <TextEditor
+          value={form.getValues().language}
+          error={form.getInputProps("language").error}
+          onChange={(value) => form.setFieldValue("language", value)}
+        />
+
+        <Button type="submit" fullWidth mt="xl" size="md" disabled={creating}>
+          <LoadingOverlay
+            visible={creating}
+            zIndex={1000}
+            overlayProps={{ radius: "sm", blur: 2 }}
+          />
+          Edit
+        </Button>
+      </form>
+    </Modal>
   );
 }
 

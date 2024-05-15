@@ -4,7 +4,7 @@ import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/cl
 import { Contract, ContractDocPayload, ContractTitlePayload, NewContractPayload, NewContractResponse } from "../types/contract";
 import { ContactsList, ContactsListPayload, CounterParty, NewCounterPartyPayload, NewOrganizationResponse, OrganizationPayload, OrganizationsResponse, PaginatedCounterParties } from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
-import { NewUserErrorResponse, NewUserPayload, NewUserResponse, PaginatedOrganizationUsers } from "../types/user";
+import { InviteUser, InviteUserError, NewUserErrorResponse, NewUserPayload, NewUserResponse, PaginatedOrganizationUsers } from "../types/user";
 import { ContractType, NewContractTypePayload, TemplateWithClause, TemplateWithClausePayload } from "../types/contract-type";
 
 const c = initContract();
@@ -252,6 +252,16 @@ export const contract = c.router({
     responses: {
       200: PaginatedOrganizationUsers,
     },
+    summary: "Get organization info"
+  },
+  inviteOrganizationUser: {
+    method: "POST",
+    path: "/api/users/org/:organizationId",
+    responses: {
+      200: InviteUser,
+      422: InviteUserError
+    },
+    body: InviteUser,
     summary: "Get organization info"
   },
 });
