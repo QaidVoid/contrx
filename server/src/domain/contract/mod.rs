@@ -60,6 +60,27 @@ pub struct ContractDocPayload {
     pub document: sqlx::types::JsonValue,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct ApproversPayload {
+    pub contract_id: Uuid,
+    pub approvers: Vec<Uuid>
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct ApprovalPayload {
+    pub contract_id: Uuid,
+    pub approver_id: Uuid,
+    pub status: String
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Approver {
+    pub contract_id: Uuid,
+    pub approver_id: Uuid,
+    pub approver_name: Option<String>,
+    pub approval_status: String
+}
+
 impl TryFrom<CreateContractPayload> for CreateContract {
     type Error = Error;
 

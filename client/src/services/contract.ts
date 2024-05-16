@@ -1,11 +1,39 @@
 import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
-import { Contract, ContractDocPayload, ContractTitlePayload, NewContractPayload, NewContractResponse } from "../types/contract";
-import { ContactsList, ContactsListPayload, CounterParty, NewCounterPartyPayload, NewOrganizationResponse, OrganizationPayload, OrganizationsResponse, PaginatedCounterParties } from "../types/organization";
+import {
+  Contract,
+  ContractApproversInfo,
+  ContractDocPayload,
+  ContractTitlePayload,
+  NewContractPayload,
+  NewContractResponse,
+} from "../types/contract";
+import {
+  ContactsList,
+  ContactsListPayload,
+  CounterParty,
+  NewCounterPartyPayload,
+  NewOrganizationResponse,
+  OrganizationPayload,
+  OrganizationsResponse,
+  PaginatedCounterParties,
+} from "../types/organization";
 import { PaginationQuery, createPaginationSchema } from "../types/pagination";
-import { InviteUser, InviteUserError, NewUserErrorResponse, NewUserPayload, NewUserResponse, PaginatedOrganizationUsers } from "../types/user";
-import { ContractType, NewContractTypePayload, TemplateWithClause, TemplateWithClausePayload } from "../types/contract-type";
+import {
+  InviteUser,
+  InviteUserError,
+  NewUserErrorResponse,
+  NewUserPayload,
+  NewUserResponse,
+  PaginatedOrganizationUsers,
+} from "../types/user";
+import {
+  ContractType,
+  NewContractTypePayload,
+  TemplateWithClause,
+  TemplateWithClausePayload,
+} from "../types/contract-type";
 
 const c = initContract();
 
@@ -24,10 +52,10 @@ export const contract = c.router({
     path: "/api/users",
     responses: {
       200: NewUserResponse,
-      422: NewUserErrorResponse
+      422: NewUserErrorResponse,
     },
     body: NewUserPayload,
-    summary: "Signup new user"
+    summary: "Signup new user",
   },
   refreshToken: {
     method: "GET",
@@ -35,16 +63,16 @@ export const contract = c.router({
     responses: {
       200: LoginResponse,
     },
-    summary: "Refresh token"
+    summary: "Refresh token",
   },
   logout: {
     method: "POST",
     path: "/api/auth/logout",
     responses: {
-      200: null
+      200: null,
     },
     body: null,
-    summary: "Logout"
+    summary: "Logout",
   },
   createOrganization: {
     method: "POST",
@@ -53,7 +81,7 @@ export const contract = c.router({
       200: NewOrganizationResponse,
     },
     body: OrganizationPayload,
-    summary: "Create new contract"
+    summary: "Create new contract",
   },
   updateOrganization: {
     method: "PUT",
@@ -62,7 +90,7 @@ export const contract = c.router({
       200: NewOrganizationResponse,
     },
     body: NewOrganizationResponse,
-    summary: "Create new contract"
+    summary: "Create new contract",
   },
   getOrganization: {
     method: "GET",
@@ -70,23 +98,23 @@ export const contract = c.router({
     responses: {
       200: NewOrganizationResponse,
     },
-    summary: "Get organization info"
+    summary: "Get organization info",
   },
   getMyOrganizations: {
     method: "GET",
     path: "/api/organizations",
     responses: {
-      200: OrganizationsResponse
+      200: OrganizationsResponse,
     },
-    summary: "Get organizations of authenticated users"
+    summary: "Get organizations of authenticated users",
   },
   getCounterParties: {
     method: "GET",
     path: "/api/organizations/:organizationId/counterparties",
     query: PaginationQuery,
     responses: {
-      200: PaginatedCounterParties
-    }
+      200: PaginatedCounterParties,
+    },
   },
   createCounterParty: {
     method: "POST",
@@ -95,51 +123,51 @@ export const contract = c.router({
       200: CounterParty,
     },
     body: NewCounterPartyPayload,
-    summary: "Create counterparty"
+    summary: "Create counterparty",
   },
   updateCounterParty: {
     method: "PUT",
     path: "/api/organizations/counterparty",
     responses: {
-      200: CounterParty
+      200: CounterParty,
     },
     body: CounterParty,
-    summary: "Update counterparty"
+    summary: "Update counterparty",
   },
   createContact: {
     method: "POST",
     path: "/api/organizations/counterparty/:counterpartyId/contact",
     responses: {
-      200: ContactsList
+      200: ContactsList,
     },
     body: ContactsListPayload,
-    summary: "Create contact"
+    summary: "Create contact",
   },
   getContacts: {
     method: "GET",
     path: "/api/organizations/counterparty/:counterpartyId/contacts",
     responses: {
-      200: ContactsList
+      200: ContactsList,
     },
-    summary: "Get contacts"
+    summary: "Get contacts",
   },
   createClause: {
     method: "POST",
     path: "/api/clauses",
     responses: {
-      200: NewClauseResponse
+      200: NewClauseResponse,
     },
     body: NewClausePayload,
-    summary: "Create new clause"
+    summary: "Create new clause",
   },
   updateClause: {
     method: "PUT",
     path: "/api/clauses",
     responses: {
-      200: NewClauseResponse
+      200: NewClauseResponse,
     },
     body: NewClauseResponse,
-    summary: "Update clause"
+    summary: "Update clause",
   },
   getClauses: {
     method: "GET",
@@ -148,23 +176,23 @@ export const contract = c.router({
     responses: {
       200: createPaginationSchema(ClauseResponse),
     },
-    summary: "Get organization info"
+    summary: "Get organization info",
   },
   getClause: {
     method: "GET",
     path: "/api/clauses/:clauseId",
     responses: {
-      200: ClauseResponse
+      200: ClauseResponse,
     },
-    summary: "Get organization info"
+    summary: "Get organization info",
   },
   createContractType: {
     method: "POST",
     path: "/api/templates",
     responses: {
-      200: ContractType
+      200: ContractType,
     },
-    body: NewContractTypePayload
+    body: NewContractTypePayload,
   },
   getTemplates: {
     method: "GET",
@@ -173,24 +201,24 @@ export const contract = c.router({
     responses: {
       200: createPaginationSchema(ContractType),
     },
-    summary: "Get organization info"
+    summary: "Get organization info",
   },
   getTemplate: {
     method: "GET",
     path: "/api/templates/:templateId",
     responses: {
-      200: TemplateWithClause
+      200: TemplateWithClause,
     },
-    summary: "Get template"
+    summary: "Get template",
   },
   updateTemplate: {
     method: "PUT",
     path: "/api/templates",
     body: TemplateWithClausePayload,
     responses: {
-      200: null
+      200: null,
     },
-    summary: "Update template"
+    summary: "Update template",
   },
   createContract: {
     method: "POST",
@@ -199,7 +227,7 @@ export const contract = c.router({
       200: NewContractResponse,
     },
     body: NewContractPayload,
-    summary: "Create new contract"
+    summary: "Create new contract",
   },
   getContracts: {
     method: "GET",
@@ -208,7 +236,7 @@ export const contract = c.router({
     responses: {
       200: createPaginationSchema(Contract),
     },
-    summary: "Get contracts"
+    summary: "Get contracts",
   },
   getContract: {
     method: "GET",
@@ -216,34 +244,34 @@ export const contract = c.router({
     responses: {
       200: Contract,
     },
-    summary: "Get contract"
+    summary: "Get contract",
   },
   updateContractTitle: {
     method: "PATCH",
     path: "/api/contracts/title/:contractId",
     responses: {
-      200: null
+      200: null,
     },
     body: ContractTitlePayload,
-    summary: "Update contract title"
+    summary: "Update contract title",
   },
   updateContractDoc: {
     method: "PATCH",
     path: "/api/contracts/doc/:contractId",
     responses: {
-      200: null
+      200: null,
     },
     body: ContractDocPayload,
-    summary: "Update document title"
+    summary: "Update document title",
   },
   publishContract: {
     method: "PATCH",
     path: "/api/contracts/publish/:contractId",
     responses: {
-      200: null
+      200: null,
     },
     body: null,
-    summary: "Publish contract"
+    summary: "Publish contract",
   },
   getOrganizationUsers: {
     method: "GET",
@@ -252,16 +280,24 @@ export const contract = c.router({
     responses: {
       200: PaginatedOrganizationUsers,
     },
-    summary: "Get organization info"
+    summary: "Get organization info",
   },
   inviteOrganizationUser: {
     method: "POST",
     path: "/api/users/org/:organizationId",
     responses: {
       200: InviteUser,
-      422: InviteUserError
+      422: InviteUserError,
     },
     body: InviteUser,
-    summary: "Get organization info"
+    summary: "Get organization info",
+  },
+  getContractApprovers: {
+    method: "GET",
+    path: "/api/contracts/approvers/:contractId",
+    responses: {
+      200: ContractApproversInfo,
+    },
+    summary: "Get contract approvers",
   },
 });

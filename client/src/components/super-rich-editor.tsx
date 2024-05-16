@@ -7,6 +7,9 @@ import TextAlign from "@tiptap/extension-text-align";
 import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
 import { Input, ScrollArea } from "@mantine/core";
+import Bold from "@tiptap/extension-bold";
+import Italic from "@tiptap/extension-italic";
+import Heading from "@tiptap/extension-heading";
 
 type Props = {
   value: string | JSONContent;
@@ -24,6 +27,9 @@ function TextEditor({ value, error, onChange }: Props) {
       SubScript,
       Highlight,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Bold,
+      Italic,
+      Heading
     ],
     content: value,
     onUpdate({ editor }) {

@@ -1,4 +1,4 @@
-import { Button, Drawer, Group, LoadingOverlay, Select, Stack, TextInput } from "@mantine/core";
+import { Button, Drawer, Group, LoadingOverlay, Select, TextInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import useAuth from "../../hooks/use-auth";

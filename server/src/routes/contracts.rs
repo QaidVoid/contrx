@@ -6,7 +6,8 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::domain::contract::{
-    Contract, ContractDocPayload, ContractTitlePayload, CreateContract, CreateContractPayload,
+    ApprovalPayload, Approver, ApproversPayload, Contract, ContractDocPayload,
+    ContractTitlePayload, CreateContract, CreateContractPayload,
 };
 use crate::domain::pagination::{PageCount, PaginatedResponse};
 use crate::{error::Error, AppState};
@@ -16,11 +17,14 @@ type Result<T> = std::result::Result<Json<T>, Error>;
 pub fn contracts_router() -> Router<AppState> {
     Router::new()
         .route("/", post(create_contract))
-        .route("/:organization_id", get(get_contracts))
         .route("/single/:contract_id", get(get_contract))
+        .route("/approvers/:contract_id", get(get_approvers))
+        .route("/:organization_id", get(get_contracts))
         .route("/doc/:contract_id", patch(update_doc))
         .route("/title/:contract_id", patch(update_title))
         .route("/publish/:contract_id", patch(publish))
+        .route("/approver", post(add_approvers))
+        .route("/approval", post(handle_approval))
 }
 
 #[axum::debug_handler]
@@ -244,4 +248,69 @@ async fn publish(Path(contract_id): Path<Uuid>, State(state): State<AppState>) -
     .await?;
 
     Ok(Json(()))
+}
+
+#[axum::debug_handler]
+async fn add_approvers(
+    State(state): State<AppState>,
+    Json(payload): Json<ApproversPayload>,
+) -> Result<()> {
+    for approver_id in payload.approvers {
+        sqlx::query!(
+            r#"
+                INSERT INTO contract_approvers (contract_id, approver_id)
+                VALUES
+                ($1, $2)
+            "#,
+            payload.contract_id,
+            approver_id
+        )
+        .execute(&state.pool)
+        .await?;
+    }
+
+    Ok(Json(()))
+}
+
+#[axum::debug_handler]
+async fn handle_approval(
+    State(state): State<AppState>,
+    Json(payload): Json<ApprovalPayload>,
+) -> Result<()> {
+    sqlx::query!(
+        r#"
+            UPDATE contract_approvers
+            SET
+            status=$2
+            WHERE id=$1
+        "#,
+        payload.approver_id,
+        payload.status
+    )
+    .execute(&state.pool)
+    .await?;
+
+    Ok(Json(()))
+}
+
+#[axum::debug_handler]
+async fn get_approvers(
+    Path(contract_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<Vec<Approver>> {
+    let approvers = sqlx::query_as!(
+        Approver,
+        r#"
+            SELECT ca.contract_id, ca.approver_id, ca.status as approval_status, concat_ws(' ', u.first_name, u.last_name) as approver_name
+            FROM contract_approvers ca
+            JOIN users u
+            ON u.id=ca.approver_id
+            WHERE ca.contract_id=$1
+        "#,
+        contract_id
+    )
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(approvers))
 }

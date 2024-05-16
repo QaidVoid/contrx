@@ -42,7 +42,7 @@ export const Contract = z.object({
   end_date: z.array(z.number()),
   renewable: z.boolean(),
   status: z.string(),
-  document: z.any()
+  document: z.any(),
 });
 
 export type Contract = z.infer<typeof Contract>;
@@ -52,13 +52,31 @@ export const PaginatedContracts = createPaginationSchema(Contract);
 export type PaginatedContracts = z.infer<typeof PaginatedContracts>;
 
 export const ContractTitlePayload = z.object({
-  title: z.string()
+  title: z.string(),
 });
 
 export type ContractTitlePayload = z.infer<typeof ContractTitlePayload>;
 
 export const ContractDocPayload = z.object({
-  document: z.any()
-})
+  document: z.any(),
+});
 
 export type ContractDocPayload = z.infer<typeof ContractDocPayload>;
+
+export const ContractApprovers = z.object({
+  contract_id: z.string(),
+  approvers: z.array(z.string()),
+});
+
+export type ContractApprovers = z.infer<typeof ContractApprovers>;
+
+export const ContractApproversInfo = z.array(
+  z.object({
+    contract_id: z.string(),
+    approver_id: z.string(),
+    approver_name: z.string(),
+    approval_status: z.string(),
+  }),
+);
+
+export type ContractApproversInfo = z.infer<typeof ContractApproversInfo>;

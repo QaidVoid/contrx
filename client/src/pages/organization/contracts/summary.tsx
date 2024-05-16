@@ -8,6 +8,7 @@ import TitleBar from "../../../components/title-bar";
 import TextEditor from "../../../components/super-rich-editor";
 import type { JSONContent } from "@tiptap/react";
 import { notifications } from "@mantine/notifications";
+import ContractApproversList from "../../../components/contract-approvers";
 
 function ContractSummary() {
   const { api } = useAuth();
@@ -16,6 +17,7 @@ function ContractSummary() {
   const [doc, setDoc] = useState<JSONContent>({ type: "doc", content: [] });
   const [edited, setEdited] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [viewApprovers, setViewApprovers] = useState(false);
 
   if (!params.organizationId || !params.contractId) return;
 
@@ -91,6 +93,10 @@ function ContractSummary() {
       <TitleBar>
         <Text c="white">Contract</Text>
 
+        <Button bg="blue.6" onClick={() => setViewApprovers(true)}>
+          View Approvers
+        </Button>
+
         <Group>
           {preview ? (
             <Button bg="blue.6" onClick={() => setPreview(false)}>
@@ -115,6 +121,12 @@ function ContractSummary() {
           ) : undefined}
         </Group>
       </TitleBar>
+
+      <ContractApproversList
+        contractId={contract.id}
+        opened={viewApprovers}
+        close={() => setViewApprovers(false)}
+      />
 
       <Center>
         <Stack w="50%" miw="900px" p="md">
