@@ -2,6 +2,7 @@ CREATE TABLE contracts (
   id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id),
   contract_type_id UUID NOT NULL REFERENCES contract_types(id),
+  contract_owner UUID NOT NULL REFERENCES users(id),
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   counterparty_id UUID NOT NULL REFERENCES counterparties(id),

@@ -14,6 +14,7 @@ pub struct LoginPayload {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AuthToken {
+    pub user_id: Uuid,
     pub access_token: String,
     pub refresh_token: String,
 }

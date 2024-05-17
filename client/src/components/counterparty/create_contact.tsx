@@ -1,13 +1,4 @@
-import {
-  TextInput,
-  Button,
-  LoadingOverlay,
-  Center,
-  Group,
-  ActionIcon,
-  Box,
-  Text,
-} from "@mantine/core";
+import { TextInput, Button, Group, ActionIcon, Box, Text } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { ContactsListForm } from "../../types/organization";
 import { randomId, useDisclosure } from "@mantine/hooks";
@@ -18,17 +9,13 @@ import { IconTrash } from "@tabler/icons-react";
 
 type Props = {
   counterpartyId: string;
-  opened: boolean;
-  open: () => void;
-  close: () => void;
 };
 
-function CreateContactForm({ counterpartyId, open, opened, close }: Props) {
+function CreateContactForm({ counterpartyId }: Props) {
   const [creating, { open: create, close: finish }] = useDisclosure();
   const { api } = useAuth();
 
   const form = useForm<ContactsListForm>({
-    mode: "uncontrolled",
     validate: zodResolver(ContactsListForm),
     initialValues: {
       contacts: [{ full_name: "", email: "", key: randomId() }],
@@ -68,10 +55,9 @@ function CreateContactForm({ counterpartyId, open, opened, close }: Props) {
         await fetchContacts();
       }
 
-      close();
       finish();
     },
-    [counterpartyId, api.createContact, close, create, finish, fetchContacts],
+    [counterpartyId, api.createContact, create, finish, fetchContacts],
   );
 
   useEffect(() => {
@@ -103,6 +89,8 @@ function CreateContactForm({ counterpartyId, open, opened, close }: Props) {
     </Group>
   ));
 
+  console.log(form.getValues());
+
   return (
     <>
       <Box maw={600} mx="auto" mt="md">
@@ -127,14 +115,19 @@ function CreateContactForm({ counterpartyId, open, opened, close }: Props) {
         <Group justify="center" mt="md">
           <Button
             onClick={() =>
-              form.insertListItem("contacts", { name: "", email: "", key: randomId() })
+              form.insertListItem("contacts", { full_name: "", email: "", key: randomId() })
             }
           >
             Add contact
           </Button>
 
           <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Button type="submit">Submit</Button>
+            <Button
+              type="submit"
+              disabled={form.getValues().contacts.some((c) => c.email === "" || c.full_name === "")}
+            >
+              Submit
+            </Button>
           </form>
         </Group>
       </Box>

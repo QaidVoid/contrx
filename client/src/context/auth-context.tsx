@@ -14,6 +14,7 @@ interface AuthContextProps {
 }
 
 const initialAuth: LoginResponse = {
+  user_id: "",
   access_token: "",
   refresh_token: "",
 };

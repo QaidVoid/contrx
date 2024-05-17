@@ -15,7 +15,6 @@ type Props = {
 
 function EditCounterParty({ counterparty, opened, close }: Props) {
   const [creating, { open: create, close: finishCreate }] = useDisclosure();
-  const [addingContact, { open: addContact, close: finishAddContact }] = useDisclosure();
   const { api } = useAuth();
 
   const counterPartyForm = useForm<CounterParty>({
@@ -83,12 +82,7 @@ function EditCounterParty({ counterparty, opened, close }: Props) {
         </Group>
       </form>
 
-      <CreateContactForm
-        counterpartyId={counterparty?.id}
-        opened={addingContact}
-        open={addContact}
-        close={finishAddContact}
-      />
+      <CreateContactForm counterpartyId={counterparty?.id} />
     </Drawer>
   );
 }

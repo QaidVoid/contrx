@@ -11,7 +11,7 @@ import { notifications } from "@mantine/notifications";
 import ContractApproversList from "../../../components/contract-approvers";
 
 function ContractSummary() {
-  const { api } = useAuth();
+  const { api, auth } = useAuth();
   const params = useParams();
   const [contract, setContract] = useState<Contract>();
   const [doc, setDoc] = useState<JSONContent>({ type: "doc", content: [] });
@@ -36,9 +36,20 @@ function ContractSummary() {
     }
   }, [api.getContract, contractId]);
 
+  const handleContractView = useCallback(async () => {
+    await api.handleApproval({
+      body: {
+        contract_id: contractId,
+        approver_id: auth.user_id,
+        status: "Viewed",
+      },
+    });
+  }, [api.handleApproval, contractId, auth.user_id]);
+
   useEffect(() => {
     fetchContract();
-  }, [fetchContract]);
+    handleContractView();
+  }, [fetchContract, handleContractView]);
 
   if (!doc || !contract) return;
 
@@ -93,33 +104,46 @@ function ContractSummary() {
       <TitleBar>
         <Text c="white">Contract</Text>
 
-        <Button bg="blue.6" onClick={() => setViewApprovers(true)}>
-          View Approvers
-        </Button>
+        {contract.contract_owner === auth.user_id ? (
+          <>
+            <Button bg="blue.6" onClick={() => setViewApprovers(true)}>
+              View Approvers
+            </Button>
 
-        <Group>
-          {preview ? (
-            <Button bg="blue.6" onClick={() => setPreview(false)}>
-              Edit
-            </Button>
-          ) : (
-            <Button bg="blue.6" onClick={() => setPreview(true)}>
-              Preview
-            </Button>
-          )}
+            <Group>
+              {preview ? (
+                <Button bg="blue.6" onClick={() => setPreview(false)}>
+                  Edit
+                </Button>
+              ) : (
+                <Button bg="blue.6" onClick={() => setPreview(true)}>
+                  Preview
+                </Button>
+              )}
 
-          {edited ? (
-            <Button bg="yellow.6" onClick={handleSave} c="gray.8">
-              Save Draft
-            </Button>
-          ) : undefined}
+              {edited ? (
+                <Button bg="yellow.6" onClick={handleSave} c="gray.8">
+                  Save Draft
+                </Button>
+              ) : undefined}
 
-          {contract.status === "Draft" ? (
-            <Button bg="blue.6" onClick={handlePublish}>
-              Publish
+              {contract.status === "Draft" ? (
+                <Button bg="blue.6" onClick={handlePublish}>
+                  Publish
+                </Button>
+              ) : undefined}
+            </Group>
+          </>
+        ) : (
+          <Group gap={12}>
+            <Button c="gray.1" bg="blue.8" onClick={() => {}}>
+              Approve Contract
             </Button>
-          ) : undefined}
-        </Group>
+            <Button c="gray.1" bg="red.8" onClick={() => {}}>
+              Reject Contract
+            </Button>
+          </Group>
+        )}
       </TitleBar>
 
       <ContractApproversList
@@ -135,7 +159,7 @@ function ContractSummary() {
               <Title>{contract.title}</Title>
             </Center>
 
-            {preview ? (
+            {preview || contract.contract_owner !== auth.user_id || contract.status !== "Draft" ? (
               <RenderHTML content={doc} />
             ) : (
               <TextEditor

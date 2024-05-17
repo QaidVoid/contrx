@@ -3,11 +3,14 @@ import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
 import {
   Contract,
+  ContractApprovers,
   ContractApproversInfo,
   ContractDocPayload,
   ContractTitlePayload,
   NewContractPayload,
   NewContractResponse,
+  ProbableApprovers,
+  UpdateContractStatusPayload,
 } from "../types/contract";
 import {
   ContactsList,
@@ -300,4 +303,29 @@ export const contract = c.router({
     },
     summary: "Get contract approvers",
   },
+  getProbableApprovers: {
+    method: "GET",
+    path: "/api/contracts/probable-approvers/:contractId",
+    responses: {
+      200: ProbableApprovers
+    },
+    summary: "Get probable approvers"
+  },
+  addApprovers: {
+    method: "POST",
+    path: "/api/contracts/approver",
+    responses: {
+      200: null
+    },
+    body: ContractApprovers,
+    summary: "Add contract approvers"
+  },
+  handleApproval: {
+    method: "PUT",
+    path: "/api/contracts/approval",
+    responses: {
+      200: null
+    },
+    body: UpdateContractStatusPayload
+  }
 });

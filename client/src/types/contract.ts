@@ -32,7 +32,8 @@ export type NewContractResponse = z.infer<typeof NewContractResponse>;
 export const Contract = z.object({
   id: z.string(),
   contract_type_id: z.string(),
-  organization: z.string(),
+  organization_id: z.string(),
+  contract_owner: z.string(),
   title: z.string(),
   description: z.string(),
   definite_term: z.boolean(),
@@ -65,7 +66,10 @@ export type ContractDocPayload = z.infer<typeof ContractDocPayload>;
 
 export const ContractApprovers = z.object({
   contract_id: z.string(),
-  approvers: z.array(z.string()),
+  approvers: z.array(z.object({
+    key: z.string(),
+    id: z.string()
+  })),
 });
 
 export type ContractApprovers = z.infer<typeof ContractApprovers>;
@@ -80,3 +84,20 @@ export const ContractApproversInfo = z.array(
 );
 
 export type ContractApproversInfo = z.infer<typeof ContractApproversInfo>;
+
+export const ProbableApprovers = z.array(
+  z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+);
+
+export type ProbableApprovers = z.infer<typeof ProbableApprovers>;
+
+export const UpdateContractStatusPayload = z.object({
+  contract_id: z.string(),
+  approver_id: z.string(),
+  status: z.string()
+});
+
+export type UpdateContractStatusPayload = z.infer<typeof UpdateContractStatusPayload>;

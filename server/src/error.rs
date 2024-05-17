@@ -92,6 +92,7 @@ impl ErrorBuilder {
 
 impl From<sqlx::Error> for Error {
     fn from(error: sqlx::Error) -> Self {
+        println!("ERROR: {:?}", error);
         let mut builder = Error::builder();
         match error {
             sqlx::Error::Database(dbe) if dbe.constraint() == Some("users_email_key") => {

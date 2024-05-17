@@ -80,6 +80,7 @@ async fn login(
     cookies.add(cookie);
 
     Ok(Json(AuthToken {
+        user_id: user.id,
         refresh_token,
         access_token,
     }))
@@ -120,7 +121,7 @@ async fn refresh_token(State(state): State<AppState>, cookies: Cookies) -> Resul
     )
     .map_err(|_| Error::Unauthorized)?;
 
-    let row = sqlx::query!("SELECT id FROM sessions WHERE id=$1", token.claims.sid)
+    let row = sqlx::query!("SELECT id, user_id FROM sessions WHERE id=$1", token.claims.sid)
         .fetch_one(&state.pool)
         .await
         .map_err(|e| match e {
@@ -133,7 +134,7 @@ async fn refresh_token(State(state): State<AppState>, cookies: Cookies) -> Resul
     let refresh_token = create_refresh_token(session_id).map_err(|_| Error::InternalServerError)?;
     let access_token = create_access_token(session_id).map_err(|_| Error::InternalServerError)?;
 
-    // TODO: updating session id directly results in it not being properly set on client side cookie.
+    // FIXME: updating session id directly results in it not being properly set on client side cookie.
     // need to find a better approach
     //
     // sqlx::query!(
@@ -154,6 +155,7 @@ async fn refresh_token(State(state): State<AppState>, cookies: Cookies) -> Resul
     cookies.add(cookie);
 
     Ok(Json(AuthToken {
+        user_id: row.user_id,
         access_token,
         refresh_token,
     }))

@@ -12,14 +12,14 @@ pub struct CreateContractPayload {
     pub description: String,
     pub effective_date: OffsetDateTime,
     pub end_date: Option<OffsetDateTime>,
-    pub counterparty_id: Uuid
+    pub counterparty_id: Uuid,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 pub enum ContractStatus {
     Draft,
     Active,
-    Expired
+    Expired,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -27,6 +27,7 @@ pub struct Contract {
     pub id: Uuid,
     pub contract_type_id: Uuid,
     pub organization_id: Uuid,
+    pub contract_owner: Uuid,
     pub title: String,
     pub description: String,
     pub definite_term: bool,
@@ -36,7 +37,7 @@ pub struct Contract {
     pub renewable: bool,
     pub end_date: Option<OffsetDateTime>,
     pub status: String,
-    pub document: sqlx::types::JsonValue
+    pub document: sqlx::types::JsonValue,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -47,7 +48,7 @@ pub struct CreateContract {
     pub description: String,
     pub effective_date: OffsetDateTime,
     pub end_date: Option<OffsetDateTime>,
-    pub counterparty_id: Uuid
+    pub counterparty_id: Uuid,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -61,16 +62,22 @@ pub struct ContractDocPayload {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+pub struct ApproverKeyId {
+    pub id: Uuid,
+    pub key: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
 pub struct ApproversPayload {
     pub contract_id: Uuid,
-    pub approvers: Vec<Uuid>
+    pub approvers: Vec<ApproverKeyId>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct ApprovalPayload {
     pub contract_id: Uuid,
     pub approver_id: Uuid,
-    pub status: String
+    pub status: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -78,7 +85,13 @@ pub struct Approver {
     pub contract_id: Uuid,
     pub approver_id: Uuid,
     pub approver_name: Option<String>,
-    pub approval_status: String
+    pub approval_status: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct ProbableApprover {
+    pub id: Uuid,
+    pub name: String,
 }
 
 impl TryFrom<CreateContractPayload> for CreateContract {
@@ -95,7 +108,7 @@ impl TryFrom<CreateContractPayload> for CreateContract {
                 description: payload.description,
                 effective_date: payload.effective_date,
                 end_date: payload.end_date,
-                counterparty_id: payload.counterparty_id
+                counterparty_id: payload.counterparty_id,
             })
         } else {
             Err(builder.build())

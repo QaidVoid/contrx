@@ -18,6 +18,7 @@ export const LoginPayload = z.object({
 export type LoginPayload = z.infer<typeof LoginPayload>;
 
 export const LoginResponse = z.object({
+  user_id: z.string(),
   access_token: z.string(),
   refresh_token: z.string(),
 });

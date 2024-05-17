@@ -1,5 +1,6 @@
 use axum::extract::{Path, State};
-use axum::routing::{get, patch};
+use axum::routing::{get, patch, put};
+use axum::{middleware, Extension};
 use axum::{routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -7,14 +8,15 @@ use uuid::Uuid;
 
 use crate::domain::contract::{
     ApprovalPayload, Approver, ApproversPayload, Contract, ContractDocPayload,
-    ContractTitlePayload, CreateContract, CreateContractPayload,
+    ContractTitlePayload, CreateContract, CreateContractPayload, ProbableApprover,
 };
 use crate::domain::pagination::{PageCount, PaginatedResponse};
+use crate::middleware::auth::auth_middleware;
 use crate::{error::Error, AppState};
 
 type Result<T> = std::result::Result<Json<T>, Error>;
 
-pub fn contracts_router() -> Router<AppState> {
+pub fn contracts_router(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/", post(create_contract))
         .route("/single/:contract_id", get(get_contract))
@@ -24,11 +26,20 @@ pub fn contracts_router() -> Router<AppState> {
         .route("/title/:contract_id", patch(update_title))
         .route("/publish/:contract_id", patch(publish))
         .route("/approver", post(add_approvers))
-        .route("/approval", post(handle_approval))
+        .route("/approval", put(handle_approval))
+        .route(
+            "/probable-approvers/:contract_id",
+            get(get_probable_approvers),
+        )
+        .route_layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth_middleware,
+        ))
 }
 
 #[axum::debug_handler]
 async fn create_contract(
+    session_id: Extension<Uuid>,
     State(state): State<AppState>,
     Json(payload): Json<CreateContractPayload>,
 ) -> Result<CreateContract> {
@@ -56,9 +67,9 @@ async fn create_contract(
         ContractID,
         r#"
             INSERT INTO contracts
-            (organization_id, contract_type_id, title, description, counterparty_id, definite_term, effective_date, end_date, renewable, status)
+            (organization_id, contract_type_id, title, description, counterparty_id, definite_term, effective_date, end_date, renewable, status, contract_owner)
             VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, (SELECT user_id FROM sessions WHERE id=$11))
             returning id
         "#,
         contract.organization_id,
@@ -70,7 +81,8 @@ async fn create_contract(
         contract.effective_date,
         contract.end_date.unwrap(),
         false,
-        "Draft"
+        "Draft",
+        session_id.0
     )
     .fetch_one(&mut *tx)
     .await
@@ -132,6 +144,7 @@ async fn create_contract(
 
 #[axum::debug_handler]
 async fn get_contracts(
+    session_id: Extension<Uuid>,
     Path(organization_id): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<PaginatedResponse<Contract>> {
@@ -140,13 +153,17 @@ async fn get_contracts(
         r#"
             SELECT COUNT(*) AS total_count
             FROM contracts
-            WHERE organization_id = $1
+            LEFT JOIN contract_approvers ca
+            ON contracts.id=ca.contract_id
+            WHERE organization_id = $1 OR ca.approver_id=(SELECT user_id FROM sessions WHERE id=$2)
         "#,
-        organization_id
+        organization_id,
+        session_id.0
     )
     .fetch_one(&state.pool)
     .await?;
 
+    // Also fetch contracts we're approver for
     let contracts = sqlx::query_as!(
         Contract,
         r#"
@@ -154,9 +171,12 @@ async fn get_contracts(
         FROM contracts c
         JOIN counterparties cp
         ON c.counterparty_id = cp.id
-        WHERE c.organization_id=$1
+        LEFT JOIN contract_approvers ca
+        ON c.id=ca.contract_id
+        WHERE c.organization_id=$1 OR ca.approver_id=(SELECT user_id FROM sessions WHERE id=$2)
         "#,
-        organization_id
+        organization_id,
+        session_id.0
     )
     .fetch_all(&state.pool)
     .await?;
@@ -255,7 +275,18 @@ async fn add_approvers(
     State(state): State<AppState>,
     Json(payload): Json<ApproversPayload>,
 ) -> Result<()> {
-    for approver_id in payload.approvers {
+    for approver in payload.approvers {
+        let record = sqlx::query!(
+            "SELECT * FROM contract_approvers WHERE approver_id=$1",
+            approver.id
+        )
+        .fetch_optional(&state.pool)
+        .await?;
+
+        if record.is_some() {
+            continue;
+        }
+
         sqlx::query!(
             r#"
                 INSERT INTO contract_approvers (contract_id, approver_id)
@@ -263,7 +294,7 @@ async fn add_approvers(
                 ($1, $2)
             "#,
             payload.contract_id,
-            approver_id
+            approver.id
         )
         .execute(&state.pool)
         .await?;
@@ -282,7 +313,7 @@ async fn handle_approval(
             UPDATE contract_approvers
             SET
             status=$2
-            WHERE id=$1
+            WHERE approver_id=$1
         "#,
         payload.approver_id,
         payload.status
@@ -306,6 +337,32 @@ async fn get_approvers(
             JOIN users u
             ON u.id=ca.approver_id
             WHERE ca.contract_id=$1
+        "#,
+        contract_id
+    )
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(approvers))
+}
+
+#[axum::debug_handler]
+async fn get_probable_approvers(
+    Path(contract_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<Vec<ProbableApprover>> {
+    let approvers = sqlx::query_as!(
+        ProbableApprover,
+        r#"
+            SELECT u.id, ct.full_name as name
+            FROM contracts c
+            JOIN counterparties cp
+            ON cp.id=c.counterparty_id
+            JOIN contacts ct
+            ON cp.id=c.counterparty_id
+            JOIN users u
+            ON u.email=ct.email
+            WHERE c.id=$1
         "#,
         contract_id
     )
