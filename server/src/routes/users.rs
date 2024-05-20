@@ -3,28 +3,29 @@ use argon2::{
     Argon2, PasswordHasher,
 };
 use axum::{
-    extract::{Path, Query, State},
-    routing::{get, post},
-    Json, Router,
+    extract::{Path, Query, State}, middleware, routing::{get, post}, Extension, Json, Router
 };
 use uuid::Uuid;
 
 use crate::{
     domain::{
         pagination::{PaginatedResponse, Pagination},
-        user::{CreateUser, CreateUserPayload, NewUser, OrgUser},
-    },
-    error::Error,
-    AppState,
+        user::{CreateUser, CreateUserPayload, NewUser, OrgUser, OrganizationUser},
+    }, error::Error, middleware::auth::auth_middleware, AppState
 };
 
 type Result<T> = std::result::Result<Json<T>, Error>;
 
-pub fn users_router() -> Router<AppState> {
+pub fn users_router(state: &AppState) -> Router<AppState> {
     Router::new()
-        .route("/", post(create_user))
         .route("/org/:organization_id", get(get_users))
         .route("/org/:organization_id", post(invite_user))
+        .route("/get-user/:organization_id", get(get_org_user))
+        .route_layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth_middleware,
+        ))
+        .route("/", post(create_user))
 }
 
 #[axum::debug_handler]
@@ -117,7 +118,11 @@ async fn invite_user(
     let user = user.unwrap();
 
     let org_user = sqlx::query!(
-        "SELECT id FROM users_organizations WHERE user_id=$1 AND organization_id=$2",
+        r#"
+            SELECT id FROM users_organizations
+            WHERE
+            user_id=$1 AND organization_id=$2
+        "#,
         user.id,
         organization_id
     )
@@ -144,5 +149,50 @@ async fn invite_user(
     .execute(&state.pool)
     .await?;
 
+    let org = sqlx::query!(
+        r#"
+            SELECT name FROM organizations WHERE id=$1
+        "#,
+        organization_id
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    sqlx::query!(
+        r#"
+            INSERT INTO notifications
+            (user_id, title, message, notification_type)
+            VALUES
+            ($1, $2, $3, $4)
+        "#,
+        user.id,
+        "Organization Invite",
+        format!("You have been invited to join {}", org.name),
+        "org_invite"
+    )
+    .execute(&state.pool)
+    .await?;
+
     Ok(Json(payload))
+}
+
+#[axum::debug_handler]
+async fn get_org_user(
+    session_id: Extension<Uuid>,
+    Path(organization_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<OrganizationUser> {
+    let user = sqlx::query_as!(
+        OrganizationUser,
+        r#"
+            SELECT * FROM users_organizations
+            WHERE user_id=(SELECT user_id FROM sessions WHERE id=$1) AND organization_id=$2
+        "#,
+        session_id.0,
+        organization_id
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    Ok(Json(user))
 }

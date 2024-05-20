@@ -77,12 +77,10 @@ function Contracts() {
             {
               accessor: "status",
               title: "Status",
-              render: (record) => record.status,
             },
             {
-              accessor: "CounterParty",
-              title: "CounterParty",
-              render: (record) => record.counterparty_name,
+              accessor: "counterparty_name",
+              title: "Counterparty",
             },
             {
               accessor: "effective_date",

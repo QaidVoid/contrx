@@ -21,7 +21,7 @@ function ContractSummary() {
 
   if (!params.organizationId || !params.contractId) return;
 
-  const { contractId, organizationId } = params;
+  const { contractId } = params;
 
   const fetchContract = useCallback(async () => {
     const { body, status } = await api.getContract({
@@ -42,6 +42,26 @@ function ContractSummary() {
         contract_id: contractId,
         approver_id: auth.user_id,
         status: "Viewed",
+      },
+    });
+  }, [api.handleApproval, contractId, auth.user_id]);
+
+  const handleContractApprove = useCallback(async () => {
+    await api.handleApproval({
+      body: {
+        contract_id: contractId,
+        approver_id: auth.user_id,
+        status: "Approved",
+      },
+    });
+  }, [api.handleApproval, contractId, auth.user_id]);
+
+  const handleContractReject = useCallback(async () => {
+    await api.handleApproval({
+      body: {
+        contract_id: contractId,
+        approver_id: auth.user_id,
+        status: "Rejected",
       },
     });
   }, [api.handleApproval, contractId, auth.user_id]);
@@ -127,7 +147,7 @@ function ContractSummary() {
                 </Button>
               ) : undefined}
 
-              {contract.status === "Draft" ? (
+              {contract.status.toLowerCase() === "draft" ? (
                 <Button bg="blue.6" onClick={handlePublish}>
                   Publish
                 </Button>
@@ -135,14 +155,24 @@ function ContractSummary() {
             </Group>
           </>
         ) : (
-          <Group gap={12}>
-            <Button c="gray.1" bg="blue.8" onClick={() => {}}>
-              Approve Contract
-            </Button>
-            <Button c="gray.1" bg="red.8" onClick={() => {}}>
-              Reject Contract
-            </Button>
-          </Group>
+          <>
+            {contract.status.toLowerCase() === "published" ? (
+              <Group gap={12}>
+                <Button c="gray.1" bg="blue.8" onClick={handleContractApprove}>
+                  Approve Contract
+                </Button>
+                <Button c="gray.1" bg="red.8" onClick={handleContractReject}>
+                  Reject Contract
+                </Button>
+              </Group>
+            ) : contract.status.toLowerCase() === "approved" ? (
+              <Text>Approved</Text>
+            ) : contract.status.toLowerCase() === "rejected" ? (
+              <Text>Rejected</Text>
+            ) : (
+              <Text>Draft</Text>
+            )}
+          </>
         )}
       </TitleBar>
 

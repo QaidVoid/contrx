@@ -312,10 +312,11 @@ async fn handle_approval(
         r#"
             UPDATE contract_approvers
             SET
-            status=$2
-            WHERE approver_id=$1
+            status=$3
+            WHERE approver_id=$1 AND contract_id=$2
         "#,
         payload.approver_id,
+        payload.contract_id,
         payload.status
     )
     .execute(&state.pool)

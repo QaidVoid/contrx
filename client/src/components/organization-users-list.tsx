@@ -48,25 +48,27 @@ function OrganizationUsersList({ organizationId, status }: Props) {
     fetchOrganizationUsers();
   }, [fetchOrganizationUsers]);
 
-  return users?.data.map((user) => (
-    <Group justify="space-between" key={user.id} p={12}>
-      <Group>
-        <Avatar src={user.role} />
-        <Stack gap={4}>
-          <Group>
-            <Text size="sm" fw={600}>
-              {user.first_name} {user.last_name}
-            </Text>
+  return users?.data.map((user) =>
+    user.status.toLowerCase() === status.toLowerCase() ? (
+      <Group justify="space-between" key={user.id} p={12}>
+        <Group>
+          <Avatar />
+          <Stack gap={4}>
+            <Group>
+              <Text size="sm" fw={600}>
+                {user.first_name} {user.last_name}
+              </Text>
 
-            <Badge variant="light">{user.role}</Badge>
-          </Group>
-          <Text size="xs" c="dimmed">
-            {user.email}
-          </Text>
-        </Stack>
+              <Badge variant="light">{user.role}</Badge>
+            </Group>
+            <Text size="xs" c="dimmed">
+              {user.email}
+            </Text>
+          </Stack>
+        </Group>
       </Group>
-    </Group>
-  ));
+    ) : undefined,
+  );
 }
 
 export default OrganizationUsersList;

@@ -48,7 +48,7 @@ function Application() {
       <SimpleGrid cols={4} spacing="md" p="md">
         {organizations.map((organization) => (
           <Card key={organization.id} withBorder radius="md" shadow="sm">
-            <Link to={`/${organization.id}`}>
+            <Link to={`/${organization.id}/overview`}>
               <Title order={3} c="blue.8">
                 {organization.name}
               </Title>

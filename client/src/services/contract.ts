@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { LoginPayload, LoginResponse } from "../types/auth";
 import { ClauseResponse, NewClausePayload, NewClauseResponse } from "../types/clause";
+import { Notifications } from "../types/notification";
 import {
   Contract,
   ContractApprovers,
@@ -29,6 +30,7 @@ import {
   NewUserErrorResponse,
   NewUserPayload,
   NewUserResponse,
+  OrganizationUser,
   PaginatedOrganizationUsers,
 } from "../types/user";
 import {
@@ -307,25 +309,39 @@ export const contract = c.router({
     method: "GET",
     path: "/api/contracts/probable-approvers/:contractId",
     responses: {
-      200: ProbableApprovers
+      200: ProbableApprovers,
     },
-    summary: "Get probable approvers"
+    summary: "Get probable approvers",
   },
   addApprovers: {
     method: "POST",
     path: "/api/contracts/approver",
     responses: {
-      200: null
+      200: null,
     },
     body: ContractApprovers,
-    summary: "Add contract approvers"
+    summary: "Add contract approvers",
   },
   handleApproval: {
     method: "PUT",
     path: "/api/contracts/approval",
     responses: {
-      200: null
+      200: null,
     },
-    body: UpdateContractStatusPayload
-  }
+    body: UpdateContractStatusPayload,
+  },
+  getNotifications: {
+    method: "GET",
+    path: "/api/notifications",
+    responses: {
+      200: Notifications,
+    },
+  },
+  getUser: {
+    method: "GET",
+    path: "/api/users/get-user/:organizationId",
+    responses: {
+      200: OrganizationUser,
+    },
+  },
 });

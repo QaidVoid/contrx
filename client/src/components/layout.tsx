@@ -1,6 +1,7 @@
 import { AppShell, Button, Group, Text } from "@mantine/core";
 import { Outlet, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/use-auth";
+import UserNotifications from "./notifications";
 
 function Layout() {
   const { api } = useAuth();
@@ -17,6 +18,8 @@ function Layout() {
           <Group justify="space-between" style={{ flex: 1 }}>
             <Text>Logo</Text>
             <Group gap={8}>
+              <UserNotifications />
+
               <Button
                 onClick={async () => {
                   await api.logout();

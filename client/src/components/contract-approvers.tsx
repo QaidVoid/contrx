@@ -104,7 +104,7 @@ function ContractApproversList({ contractId, opened, close }: Props) {
     <Drawer opened={opened} onClose={close} title="Approvers" position="right" size="sm">
       <Stack gap={16}>
         {approvers?.map((approver) => (
-          <Stack gap={16}>
+          <Stack key={approver.approver_id} gap={16}>
             <Paper withBorder shadow="lg" p="md">
               <Group gap={16} justify="space-between">
                 <Text>{approver.approver_name}</Text>

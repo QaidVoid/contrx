@@ -11,14 +11,13 @@ import OrganizationUsers from "./pages/organization/organization-users";
 import OrganizationClauses from "./pages/organization/clauses";
 import OrganizationContract from "./pages/organization/organization-contract";
 import OrganizationTemplates from "./pages/organization/organization-templates";
-import ApprovalWorkflows from "./pages/organization/approval-workflows";
-import ChoiceList from "./pages/organization/choice-list";
 import OrganizationDashboard from "./pages/organization/organization-dashboard";
 import OrganizationClause from "./pages/organization/clause/detail";
 import CreateContractType from "./pages/organization/contract/create";
 import EditContractType from "./pages/organization/contract/edit";
 import CounterParties from "./pages/organization/counterparties";
 import ContractSummary from "./pages/organization/contracts/summary";
+import Overview from "./pages/organization/overview";
 
 export const router = createBrowserRouter([
   {
@@ -59,10 +58,10 @@ export const router = createBrowserRouter([
             path: "/:organizationId",
             element: <OrganizationDashboard />,
             children: [
-              // {
-              //   path: "/overview",
-              //   element: <Dashboard />,
-              // },
+              {
+                path: "/:organizationId/overview",
+                element: <Overview />,
+              },
               {
                 path: "/:organizationId/contracts",
                 element: <Contracts />,
