@@ -50,6 +50,8 @@ function EditOrganization({ onEdit, organization, opened, close }: Props) {
     finish();
   };
 
+  form.initialize(organization);
+
   return (
     <Modal opened={opened} onClose={close} title="Edit Organization">
       <form onSubmit={form.onSubmit(handleSubmit)}>

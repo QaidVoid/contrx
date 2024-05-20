@@ -13,6 +13,7 @@ import SubScript from "@tiptap/extension-subscript";
 import Highlight from "@tiptap/extension-highlight";
 import Italic from "@tiptap/extension-italic";
 import Heading from "@tiptap/extension-heading";
+import HardBreak from '@tiptap/extension-hard-break';
 
 type Props = {
   content: JSONContent
@@ -33,7 +34,8 @@ export default function RenderHTML({ content }: Props) {
       SubScript,
       Highlight,
       Italic,
-      Heading
+      Heading,
+      HardBreak
     ])
   }, [content])
 

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import Table from "../components/table";
-import type { Contract, PaginatedContracts } from "../types/contract";
+import type { PaginatedContracts } from "../types/contract";
 import dayjs from "dayjs";
 import { parseDate } from "../lib";
 
@@ -19,7 +19,6 @@ function Contracts() {
     total_count: 0,
   });
   const [fetching, { open: fetch, close: completeFetch }] = useDisclosure(false);
-  const [contract, setContract] = useState<Contract | undefined>();
   const [searchParams, _] = useSearchParams();
 
   if (!params.organizationId) return;
@@ -58,7 +57,7 @@ function Contracts() {
     <>
       <TitleBar>
         <Text c="white">Contracts</Text>
-        <CreateContractForm />
+        <CreateContractForm onCreate={fetchContracts} />
       </TitleBar>
 
       <Stack p="md">

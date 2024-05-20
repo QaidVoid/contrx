@@ -14,7 +14,7 @@ import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { NewUserPayload } from "../types/user";
 import { match } from "ts-pattern";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Register() {
   const form = useForm({
@@ -26,12 +26,15 @@ function Register() {
       password: "",
       confirm_password: "",
     },
-    validate: zodResolver(NewUserPayload.refine((data) => data.password === data.confirm_password, {
-      message: "Passwords do not match",
-      path: ["confirm_password"]
-    }))
+    validate: zodResolver(
+      NewUserPayload.refine((data) => data.password === data.confirm_password, {
+        message: "Passwords do not match",
+        path: ["confirm_password"],
+      }),
+    ),
   });
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (data: NewUserPayload) => {
     setIsSigningUp(true);
@@ -44,6 +47,8 @@ function Register() {
         title: "Signup",
         message: "Successfully signed up",
       });
+
+      navigate("/login", { replace: true });
     } else if (status === 422) {
       const errors = body.errors;
 

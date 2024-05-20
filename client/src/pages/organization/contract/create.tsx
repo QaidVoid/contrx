@@ -22,9 +22,6 @@ function CreateContractType() {
     validate: zodResolver(NewContractTypeForm),
   });
 
-  console.log("ERROR:", form.errors);
-  console.log("VALUES:", form.values);
-
   const handleSubmit = useCallback(
     async (data: NewContractTypeForm) => {
       const validated = parseContractType(data);
@@ -121,6 +118,7 @@ function CreateContractType() {
 
           <Group align="start" grow>
             <Select
+              allowDeselect={false}
               label="Party A"
               placeholder="Select party"
               size="md"
@@ -131,6 +129,7 @@ function CreateContractType() {
             />
 
             <Select
+              allowDeselect={false}
               label="Party B"
               placeholder="Select party"
               size="md"

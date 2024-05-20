@@ -17,7 +17,7 @@ import TitleBar from "../../../components/title-bar";
 import useAuth from "../../../hooks/use-auth";
 import type { TemplateWithClause } from "../../../types/contract-type";
 import { notifications } from "@mantine/notifications";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { IconFilePlus, IconGripVertical, IconTrash } from "@tabler/icons-react";
 import type { ClauseResponse, PaginatedClausesResponse } from "../../../types/clause";
 import RenderHTML from "../../../components/html-content";
@@ -27,7 +27,6 @@ import { Draggable, DragDropContext, Droppable } from "@hello-pangea/dnd";
 function EditContractType() {
   const [showModal, setShowModal] = useState(false);
   const { api } = useAuth();
-  const navigate = useNavigate();
   const params = useParams();
   const [template, setTemplate] = useState<TemplateWithClause>();
   const [clauses, setClauses] = useState<PaginatedClausesResponse>({
@@ -36,6 +35,7 @@ function EditContractType() {
   });
   const [selectedClause, setSelectedClause] = useState<ClauseResponse>();
   const [state, handlers] = useListState<ClauseResponse>();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   if (!params.templateId || !params.organizationId) return;
 
@@ -101,26 +101,62 @@ function EditContractType() {
     const { status } = await api.updateTemplate({
       body: {
         contract_type: template.contract_type,
-        clauses: state
-      }
+        clauses: state,
+      },
     });
 
     if (status === 200) {
       notifications.show({
         title: "Template",
-        message: "Updated successfully"
+        message: "Updated successfully",
       });
     } else {
       notifications.show({
         color: "red.5",
         title: "Template",
-        message: "Failed to update"
+        message: "Failed to update",
       });
     }
   }, [api.updateTemplate, template, state]);
 
   const items = state.map((item, idx) => (
-    <Group key={item.id} py={8}>
+    <Group
+      key={item.id}
+      p={8}
+      className="hover:bg-gray-200 hover:rounded-md"
+      onMouseEnter={() => setHoveredIndex(idx)}
+      onMouseLeave={() => setHoveredIndex(null)}
+    >
+      <Draggable index={idx} draggableId={item.id}>
+        {(provided, _snapshot) => (
+          <Stack
+            flex={1}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            ref={provided.innerRef}
+          >
+            <Group pos={"relative"}>
+              {hoveredIndex === idx ? (
+                <ActionIcon
+                  pos={"absolute"}
+                  right={10}
+                  top={-4}
+                  color="red"
+                  onClick={() => handlers.remove(idx)}
+                >
+                  <IconTrash size="1rem" />
+                </ActionIcon>
+              ) : undefined}
+              <RenderHTML content={item.language} />
+            </Group>
+          </Stack>
+        )}
+      </Draggable>
+    </Group>
+  ));
+
+  const draggableItems = state.map((item, idx) => (
+    <Group key={item.id} p={8} className="hover:bg-gray-200 hover:rounded-md">
       <Draggable index={idx} draggableId={item.id}>
         {(provided, _snapshot) => (
           <Stack flex={1} {...provided.draggableProps} ref={provided.innerRef}>
@@ -128,16 +164,11 @@ function EditContractType() {
               <Box {...provided.dragHandleProps}>
                 <IconGripVertical />
               </Box>
-              <Title order={2}>{item.title}</Title>
+              <Title order={5}>{item.title}</Title>
             </Group>
-            <RenderHTML content={item.language} />
           </Stack>
         )}
       </Draggable>
-
-      <ActionIcon color="red" onClick={() => handlers.remove(idx)}>
-        <IconTrash size="1rem" />
-      </ActionIcon>
     </Group>
   ));
 
@@ -146,11 +177,7 @@ function EditContractType() {
       <TitleBar>
         <Text c="white">Edit Template</Text>
 
-        <Button
-          onClick={handleSubmit}
-        >
-          Save
-        </Button>
+        <Button onClick={handleSubmit}>Save</Button>
       </TitleBar>
 
       <Modal
@@ -213,7 +240,7 @@ function EditContractType() {
         </AppShell>
       </Modal>
 
-      <Center>
+      <Group justify="space-between" align="start">
         <Stack w="50%" miw="900px" p="md" gap={16}>
           <Stack gap={0}>
             <Paper withBorder p={18}>
@@ -225,7 +252,7 @@ function EditContractType() {
                   handlers.reorder({ from: source.index, to: destination?.index || 0 })
                 }
               >
-                <Droppable droppableId="dnd-list" direction="vertical">
+                <Droppable droppableId="dnd-item-list" direction="vertical">
                   {(provided) => (
                     <div {...provided.droppableProps} ref={provided.innerRef}>
                       {items}
@@ -249,7 +276,30 @@ function EditContractType() {
             </Paper>
           </Stack>
         </Stack>
-      </Center>
+
+        <Paper withBorder p="md" m="md" miw={400}>
+          <DragDropContext
+            onDragEnd={({ destination, source }) =>
+              handlers.reorder({ from: source.index, to: destination?.index || 0 })
+            }
+          >
+            <Title ta="center" order={3}>
+              Clauses
+            </Title>
+
+            <Divider my="md" />
+
+            <Droppable droppableId="dnd-list" direction="vertical">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {draggableItems}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </Paper>
+      </Group>
     </>
   );
 }

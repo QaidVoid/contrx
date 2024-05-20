@@ -11,7 +11,11 @@ import type { CounterParty } from "../types/organization";
 import { useParams } from "react-router-dom";
 import { dateToOffset } from "../lib";
 
-function CreateContractForm() {
+type Props = {
+  onCreate: () => void;
+}
+
+function CreateContractForm({ onCreate }: Props) {
   const [opened, { open, close }] = useDisclosure(false);
   const [creating, { open: create, close: finish }] = useDisclosure(false);
   const form = useForm<NewContractForm>({
@@ -32,7 +36,7 @@ function CreateContractForm() {
   const handleSubmit = async (data: NewContractForm) => {
     create();
 
-    const { body, status } = await api.createContract({
+    const { status } = await api.createContract({
       body: {
         ...data,
         effective_date: dateToOffset(data.effective_date),
@@ -45,6 +49,8 @@ function CreateContractForm() {
         title: "Create Contract",
         message: "Successfully created contract",
       });
+      onCreate();
+      close();
     } else {
       notifications.show({
         color: "red.7",

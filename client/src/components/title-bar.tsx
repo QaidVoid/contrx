@@ -3,7 +3,7 @@ import type { PropsWithChildren } from "react";
 
 function TitleBar({ children }: PropsWithChildren) {
   return (
-    <Group bg="green.6" p={18} justify="space-between">
+    <Group bg="blue.8" p={18} justify="space-between">
       {children}
     </Group>
   );

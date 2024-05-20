@@ -7,6 +7,7 @@ import { notifications } from "@mantine/notifications";
 import CreateOrganizationForm from "../components/create-organization-form";
 import { IconSettings, IconTrash } from "@tabler/icons-react";
 import EditOrganization from "../components/edit-organization-form";
+import TitleBar from "../components/title-bar";
 
 function Application() {
   const [organizations, setOrganizations] = useState<OrganizationsResponse>([]);
@@ -32,7 +33,7 @@ function Application() {
 
   return (
     <>
-      <Group bg="green.6" p={18} justify="space-between">
+      <TitleBar>
         <Text c="white">My Organizations</Text>
         <CreateOrganizationForm onCreate={fetchOrganizations} />
 
@@ -42,9 +43,9 @@ function Application() {
           organization={organization}
           close={() => setOrganization(undefined)}
         />
-      </Group>
+      </TitleBar>
 
-      <SimpleGrid cols={4} spacing="md" mt="md">
+      <SimpleGrid cols={4} spacing="md" p="md">
         {organizations.map((organization) => (
           <Card key={organization.id} withBorder radius="md" shadow="sm">
             <Link to={`/${organization.id}`}>

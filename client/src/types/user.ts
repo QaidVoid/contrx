@@ -22,7 +22,7 @@ export const NewUserPayload = User.omit({ id: true }).extend({
 export type NewUserPayload = z.infer<typeof NewUserPayload>;
 
 export const NewUserResponse = z.object({
-  email: z.string(),
+  email: z.string().email({ message: "Invalid email" }),
   first_name: z.string(),
   last_name: z.string(),
 });
