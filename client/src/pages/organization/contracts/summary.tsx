@@ -1,8 +1,8 @@
 import { Button, Center, Group, Paper, Stack, Text, Title } from "@mantine/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useAuth from "../../../hooks/use-auth";
 import { useParams } from "react-router-dom";
-import type { Contract } from "../../../types/contract";
+import type { Contract, ContractApproversInfo } from "../../../types/contract";
 import RenderHTML from "../../../components/html-content";
 import TitleBar from "../../../components/title-bar";
 import TextEditor from "../../../components/super-rich-editor";
@@ -17,6 +17,7 @@ function ContractSummary() {
   const [doc, setDoc] = useState<JSONContent>({ type: "doc", content: [] });
   const [edited, setEdited] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [approvers, setApprovers] = useState<ContractApproversInfo>();
   const [viewApprovers, setViewApprovers] = useState(false);
 
   if (!params.organizationId || !params.contractId) return;
@@ -36,14 +37,28 @@ function ContractSummary() {
     }
   }, [api.getContract, contractId]);
 
-  const handleContractView = useCallback(async () => {
-    await api.handleApproval({
-      body: {
-        contract_id: contractId,
-        approver_id: auth.user_id,
-        status: "Viewed",
+  const fetchApprovers = useCallback(async () => {
+    const { body, status } = await api.getContractApprovers({
+      params: {
+        contractId,
       },
     });
+
+    if (status === 200) {
+      setApprovers(body);
+    }
+  }, [contractId, api.getContractApprovers]);
+
+  const handleContractView = useCallback(async () => {
+    if (approver?.approval_status.toLowerCase() === "pending") {
+      await api.handleApproval({
+        body: {
+          contract_id: contractId,
+          approver_id: auth.user_id,
+          status: "Viewed",
+        },
+      });
+    }
   }, [api.handleApproval, contractId, auth.user_id]);
 
   const handleContractApprove = useCallback(async () => {
@@ -68,8 +83,13 @@ function ContractSummary() {
 
   useEffect(() => {
     fetchContract();
+    fetchApprovers();
     handleContractView();
-  }, [fetchContract, handleContractView]);
+  }, [fetchContract, handleContractView, fetchApprovers]);
+
+  const approver = useMemo(() => {
+    return approvers?.find((approver) => approver.approver_id === auth.user_id);
+  }, [approvers, auth.user_id]);
 
   if (!doc || !contract) return;
 
@@ -156,7 +176,9 @@ function ContractSummary() {
           </>
         ) : (
           <>
-            {contract.status.toLowerCase() === "published" ? (
+            {contract.status.toLowerCase() === "published" &&
+              approver?.approval_status.toLowerCase() !== "approved" &&
+              approver?.approval_status.toLowerCase() !== "rejected" ? (
               <Group gap={12}>
                 <Button c="gray.1" bg="blue.8" onClick={handleContractApprove}>
                   Approve Contract
@@ -165,10 +187,10 @@ function ContractSummary() {
                   Reject Contract
                 </Button>
               </Group>
-            ) : contract.status.toLowerCase() === "approved" ? (
-              <Text>Approved</Text>
-            ) : contract.status.toLowerCase() === "rejected" ? (
-              <Text>Rejected</Text>
+            ) : approver?.approval_status.toLowerCase() === "approved" ? (
+              <Text>You've approved this contract</Text>
+            ) : approver?.approval_status.toLowerCase() === "rejected" ? (
+              <Text>You've rejected this contract</Text>
             ) : (
               <Text>Draft</Text>
             )}

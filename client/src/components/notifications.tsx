@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Notifications } from "../types/notification";
 import useAuth from "../hooks/use-auth";
 import { IconBell } from "@tabler/icons-react";
-import { Button, Group, Modal, Popover, Stack, Text } from "@mantine/core";
+import { Button, Group, Modal, Paper, Popover, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 const UserNotifications = () => {
@@ -47,20 +47,22 @@ const UserNotifications = () => {
         </Button>
       </Popover.Target>
       <Popover.Dropdown>
-        <Stack gap={8}>
-          {userNotifications.length ? (
-            userNotifications.map((n) => (
-              <Group key={n.id} gap={8}>
-                <Stack>
-                  <Text>{n.title}</Text>
-                  <Text>{n.message}</Text>
-                </Stack>
-              </Group>
-            ))
-          ) : (
-            <Text>Nothing to see here</Text>
-          )}
-        </Stack>
+        <Paper withBorder shadow="md">
+          <Stack gap={8} p="sm">
+            {userNotifications.length ? (
+              userNotifications.map((n) => (
+                <Group key={n.id} gap={8}>
+                  <Stack>
+                    <Text>{n.title}</Text>
+                    <Text>{n.message}</Text>
+                  </Stack>
+                </Group>
+              ))
+            ) : (
+              <Text>Nothing to see here</Text>
+            )}
+          </Stack>
+        </Paper>
       </Popover.Dropdown>
     </Popover>
   );
