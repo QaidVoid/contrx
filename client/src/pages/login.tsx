@@ -32,7 +32,15 @@ function Login() {
     });
 
     if (status === 200) {
-      auth.login(body);
+        const { body: userBody, status: userStatus } = await api.getUserById({
+          params: {
+            userId: body.user_id,
+          },
+        });
+
+        if (userStatus === 200) {
+          auth.login(body, userBody);
+        }
 
       notifications.show({
         bg: "green.0",

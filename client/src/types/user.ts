@@ -29,6 +29,10 @@ export const NewUserResponse = z.object({
 
 export type NewUserResponse = z.infer<typeof NewUserResponse>;
 
+export const UserPayload = NewUserResponse;
+
+export type UserPayload = z.infer<typeof UserPayload>;
+
 export const NewUserErrorResponse = z.object({
   errors: z.array(
     z.object({

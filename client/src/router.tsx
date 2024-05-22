@@ -19,6 +19,7 @@ import CounterParties from "./pages/organization/counterparties";
 import ContractSummary from "./pages/organization/contracts/summary";
 import Overview from "./pages/organization/overview";
 import Profile from "./pages/profile";
+import PersonalInfo from "./pages/profile/personal-info";
 
 export const router = createBrowserRouter([
   {
@@ -53,7 +54,13 @@ export const router = createBrowserRouter([
           },
           {
             path: "/profile",
-            element: <Profile />
+            element: <Profile />,
+            children: [
+              {
+                path: "/profile/personal-info",
+                element: <PersonalInfo />
+              }
+            ]
           },
           {
             path: "/:organizationId",

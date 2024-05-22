@@ -33,6 +33,7 @@ import {
   OrganizationUser,
   PaginatedOrganizationUsers,
   User,
+  UserPayload,
 } from "../types/user";
 import {
   ContractType,
@@ -351,5 +352,13 @@ export const contract = c.router({
     responses: {
       200: User
     }
+  },
+  updateProfile: {
+    method: "PUT",
+    path: "/api/users/update-profile",
+    responses: {
+      200: User
+    },
+    body: UserPayload
   }
 });
