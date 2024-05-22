@@ -1,16 +1,19 @@
-import { Stack, Text } from "@mantine/core";
+import { Paper, Stack, Text } from "@mantine/core";
 
 type Props = {
-  start: boolean;
-  end: boolean;
-}
+  title: string;
+  message: string | number;
+};
 
-function ContractCard({ start, end }: Props) {
+function ContractCard({ title, message } : Props) {
   return (
-  <Stack>
-      <Text>{}</Text>
-  </Stack>
-  )
+    <Paper withBorder>
+      <Stack gap={16} p="md">
+        <Text size="xl" fw="bold">{title}</Text>
+        <Text>{message}</Text>
+      </Stack>
+    </Paper>
+  );
 }
 
 export default ContractCard;

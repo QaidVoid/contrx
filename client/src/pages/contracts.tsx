@@ -1,4 +1,4 @@
-import { Stack, Text } from "@mantine/core";
+import { Badge, Stack, Text } from "@mantine/core";
 import CreateContractForm from "../components/create-contract-form";
 import TitleBar from "../components/title-bar";
 import useAuth from "../hooks/use-auth";
@@ -77,6 +77,7 @@ function Contracts() {
             {
               accessor: "status",
               title: "Status",
+              render: ({ status }) => <Badge bg={status === "Published" ? "green.8" : "yellow.6"}>{status}</Badge>,
             },
             {
               accessor: "counterparty_name",

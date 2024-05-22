@@ -18,6 +18,7 @@ import EditContractType from "./pages/organization/contract/edit";
 import CounterParties from "./pages/organization/counterparties";
 import ContractSummary from "./pages/organization/contracts/summary";
 import Overview from "./pages/organization/overview";
+import Profile from "./pages/profile";
 
 export const router = createBrowserRouter([
   {
@@ -48,11 +49,11 @@ export const router = createBrowserRouter([
                 path: "/app",
                 element: <Application />,
               },
-              // {
-              //   path: "/profile",
-              //   element: <Profile />
-              // }
             ],
+          },
+          {
+            path: "/profile",
+            element: <Profile />
           },
           {
             path: "/:organizationId",

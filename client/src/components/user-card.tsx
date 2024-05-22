@@ -29,7 +29,10 @@ function UserCard() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
+        <Menu.Item
+          leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+          onClick={() => navigate("/profile")}
+        >
           Settings
         </Menu.Item>
         <Menu.Item

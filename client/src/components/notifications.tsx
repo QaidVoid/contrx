@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Notifications } from "../types/notification";
 import useAuth from "../hooks/use-auth";
 import { IconBell } from "@tabler/icons-react";
-import { Button, Group, Modal, Paper, Popover, Stack, Text } from "@mantine/core";
+import { Button, Group, Paper, Popover, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 const UserNotifications = () => {
@@ -47,22 +47,24 @@ const UserNotifications = () => {
         </Button>
       </Popover.Target>
       <Popover.Dropdown>
-        <Paper withBorder shadow="md">
-          <Stack gap={8} p="sm">
-            {userNotifications.length ? (
-              userNotifications.map((n) => (
-                <Group key={n.id} gap={8}>
-                  <Stack>
-                    <Text>{n.title}</Text>
-                    <Text>{n.message}</Text>
-                  </Stack>
-                </Group>
-              ))
-            ) : (
-              <Text>Nothing to see here</Text>
-            )}
-          </Stack>
-        </Paper>
+        <Group mb="sm" justify="space-between">
+          <Text size="sm">{userNotifications.length} unread notifications</Text>
+          <Button unstyled><Text size="sm">Dismiss all</Text></Button>
+        </Group>
+        {userNotifications.length ? (
+          userNotifications.map((n) => (
+            <Paper key={n.id} withBorder shadow="md" p="sm">
+              <Group gap={8}>
+                <Stack gap={0}>
+                  <Text>{n.title}</Text>
+                  <Text>{n.message}</Text>
+                </Stack>
+              </Group>
+            </Paper>
+          ))
+        ) : (
+          <Text>Nothing to see here</Text>
+        )}
       </Popover.Dropdown>
     </Popover>
   );

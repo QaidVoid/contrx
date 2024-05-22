@@ -6,7 +6,6 @@ import {
   Container,
   Grid,
   Group,
-  Image,
   Text,
   Title,
 } from "@mantine/core";

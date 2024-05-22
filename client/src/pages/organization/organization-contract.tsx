@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Text, Stack } from "@mantine/core";
+import { Button, Text, Stack, Badge } from "@mantine/core";
 import TitleBar from "../../components/title-bar";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useAuth from "../../hooks/use-auth";
@@ -74,7 +74,9 @@ function OrganizationContract() {
             {
               accessor: "status",
               title: "Status",
-              render: (record) => record.status
+              render: ({ status }) => (
+                <Badge bg={status === "Published" ? "green.8" : "yellow.6"}>{status}</Badge>
+              ),
             }
           ]}
         />

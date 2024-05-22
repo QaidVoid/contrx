@@ -2,6 +2,7 @@ import { AppShell, Button, Group, Text } from "@mantine/core";
 import { Outlet, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/use-auth";
 import UserNotifications from "./notifications";
+import UserCard from "./user-card";
 
 function Layout() {
   const { api } = useAuth();
@@ -10,7 +11,7 @@ function Layout() {
   return (
     <AppShell
       header={{
-        height: 60,
+        height: 80,
       }}
     >
       <AppShell.Header>
@@ -20,18 +21,15 @@ function Layout() {
             <Group gap={8}>
               <UserNotifications />
 
-              <Button
-                onClick={async () => {
-                  await api.logout();
-                  navigate("/");
-                }}
-              >
-                Logout
-              </Button>
+              <UserCard />
             </Group>
           </Group>
         </Group>
       </AppShell.Header>
+
+      <AppShell.Navbar>
+
+      </AppShell.Navbar>
 
       <AppShell.Main>
         <Outlet />
