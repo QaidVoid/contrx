@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     domain::{
         pagination::{PaginatedResponse, Pagination},
-        user::{CreateUser, CreateUserPayload, NewUser, OrgUser, OrganizationUser},
+        user::{CreateUser, CreateUserPayload, NewUser, OrgUser, OrganizationUser, SafeUser},
     }, error::Error, middleware::auth::auth_middleware, AppState
 };
 
@@ -26,6 +26,7 @@ pub fn users_router(state: &AppState) -> Router<AppState> {
             auth_middleware,
         ))
         .route("/", post(create_user))
+        .route("/get-user-by-id/:user_id", get(get_user_by_id))
 }
 
 #[axum::debug_handler]
@@ -190,6 +191,25 @@ async fn get_org_user(
         "#,
         session_id.0,
         organization_id
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    Ok(Json(user))
+}
+
+#[axum::debug_handler]
+async fn get_user_by_id(
+    Path(user_id): Path<Uuid>,
+    State(state): State<AppState>,
+) -> Result<SafeUser> {
+    let user = sqlx::query_as!(
+        SafeUser,
+        r#"
+            SELECT id, email, first_name, last_name FROM users
+            WHERE id=$1
+        "#,
+        user_id
     )
     .fetch_one(&state.pool)
     .await?;

@@ -145,7 +145,7 @@ function ContractSummary() {
         <Text c="white">Contract</Text>
 
         {contract.contract_owner === auth.user_id ? (
-          <>
+          <Group gap={12}>
             <Button bg="blue.6" onClick={() => setViewApprovers(true)}>
               View Approvers
             </Button>
@@ -173,7 +173,7 @@ function ContractSummary() {
                 </Button>
               ) : undefined}
             </Group>
-          </>
+          </Group>
         ) : (
           <>
             {contract.status.toLowerCase() === "published" &&

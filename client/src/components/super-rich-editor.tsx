@@ -94,8 +94,8 @@ function TextEditor({ value, error, onChange }: Props) {
           </RichTextEditor.ControlsGroup>
         </RichTextEditor.Toolbar>
 
-        <ScrollArea h="240px">
-          <RichTextEditor.Content h="240px" mah="240px" />
+        <ScrollArea h="800px">
+          <RichTextEditor.Content h="240px" mah="800px" />
         </ScrollArea>
       </RichTextEditor>
     </Input.Wrapper>

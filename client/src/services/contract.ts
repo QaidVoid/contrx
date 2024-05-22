@@ -32,6 +32,7 @@ import {
   NewUserResponse,
   OrganizationUser,
   PaginatedOrganizationUsers,
+  User,
 } from "../types/user";
 import {
   ContractType,
@@ -344,4 +345,11 @@ export const contract = c.router({
       200: OrganizationUser,
     },
   },
+  getUserById: {
+    method: "GET",
+    path: "/api/users/get-user-by-id/:userId",
+    responses: {
+      200: User
+    }
+  }
 });

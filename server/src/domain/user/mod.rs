@@ -39,6 +39,15 @@ pub struct CreateUser {
     pub last_name: Name,
 }
 
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct SafeUser {
+    pub id: String,
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct OrganizationUser {
     pub id: String,

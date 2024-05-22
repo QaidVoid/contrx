@@ -1,4 +1,4 @@
-import { AppShell, Button, Group, ScrollArea, Stack, Text } from "@mantine/core";
+import { AppShell, Button, Divider, Group, ScrollArea, Stack, Text } from "@mantine/core";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import {
   IconFileAnalytics,
@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import UserNotifications from "../../components/notifications";
 import type { OrganizationUser } from "../../types/user";
+import UserCard from "../../components/user-card";
 
 function OrganizationDashboard() {
   const { api } = useAuth();
@@ -82,67 +83,65 @@ function OrganizationDashboard() {
             <Text>Logo</Text>
             <Group gap={8}>
               <UserNotifications />
-
-              <Button
-                onClick={async () => {
-                  await api.logout();
-                  navigate("/");
-                }}
-              >
-                Logout
-              </Button>
             </Group>
           </Group>
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="md">
-        <ScrollArea>
-          <Stack p={4} gap={20}>
-            <LinkGroup
-              name="Dashboard"
-              links={[
-                {
-                  label: "Overview",
-                  href: "/overview",
-                  icon: IconUserBolt,
-                },
-                {
-                  label: "Contracts",
-                  href: `/${organizationId}/contracts`,
-                  icon: IconFileAnalytics,
-                }
-              ]}
-            />
-            {orgUser?.role.toLowerCase() === "admin" ? (
+      <AppShell.Navbar>
+        <Stack justify="space-between" h="100vh">
+          <ScrollArea>
+            <Stack gap={20} p="md">
               <LinkGroup
-                name="Organization"
+                name="Dashboard"
                 links={[
                   {
-                    label: "Users",
-                    href: `/${organizationId}/users`,
-                    icon: IconUsers,
+                    label: "Overview",
+                    href: `/${organizationId}/overview`,
+                    icon: IconUserBolt,
                   },
                   {
-                    label: "Counterparties",
-                    href: `/${organizationId}/counterparties`,
-                    icon: IconSettings,
-                  },
-                  {
-                    label: "Clauses",
-                    href: `/${organizationId}/clauses`,
-                    icon: IconNotification,
-                  },
-                  {
-                    label: "Contract Types",
-                    href: `/${organizationId}/contract-types`,
+                    label: "Contracts",
+                    href: `/${organizationId}/contracts`,
                     icon: IconFileAnalytics,
                   },
                 ]}
               />
-            ) : undefined}
+              {orgUser?.role.toLowerCase() === "admin" ? (
+                <LinkGroup
+                  name="Organization"
+                  links={[
+                    {
+                      label: "Users",
+                      href: `/${organizationId}/users`,
+                      icon: IconUsers,
+                    },
+                    {
+                      label: "Counterparties",
+                      href: `/${organizationId}/counterparties`,
+                      icon: IconSettings,
+                    },
+                    {
+                      label: "Clauses",
+                      href: `/${organizationId}/clauses`,
+                      icon: IconNotification,
+                    },
+                    {
+                      label: "Contract Types",
+                      href: `/${organizationId}/contract-types`,
+                      icon: IconFileAnalytics,
+                    },
+                  ]}
+                />
+              ) : undefined}
+            </Stack>
+          </ScrollArea>
+
+          <Stack gap={0}>
+            <Divider />
+            <UserCard />
           </Stack>
-        </ScrollArea>
+        </Stack>
       </AppShell.Navbar>
 
       <AppShell.Main>

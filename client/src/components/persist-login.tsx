@@ -12,7 +12,15 @@ function PersistLogin() {
     const verifyRefreshToken = async () => {
       const { body, status } = await api.refreshToken();
       if (status === 200) {
-        login(body);
+        const { body: userBody, status: userStatus } = await api.getUserById({
+          params: {
+            userId: body.user_id,
+          },
+        });
+
+        if (userStatus === 200) {
+          login(body, userBody);
+        }
       }
       setIsLoading(false);
     };
@@ -20,7 +28,10 @@ function PersistLogin() {
   }, [login, auth.access_token]);
 
   useEffect(() => {
-    if (auth.access_token && (window.location.pathname === "/login" || window.location.pathname === "/")) {
+    if (
+      auth.access_token &&
+      (window.location.pathname === "/login" || window.location.pathname === "/")
+    ) {
       navigate("/app");
     } else if (auth.access_token) {
       navigate(window.location.pathname, { replace: true });
